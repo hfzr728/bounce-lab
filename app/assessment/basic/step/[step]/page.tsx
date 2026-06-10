@@ -35,13 +35,43 @@ function BasicStepContent() {
   const handleSubmit = async () => {
     dispatch({ type: "SET_SUBMITTING", value: true });
     try {
-      const response = await fetch("/api/diagnose/stream", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ answers: state.answers }) });
-      const reader = response.body?.getReader(); if (!reader) throw new Error("no reader");
-      const decoder = new TextDecoder(); let engineResult: any = null, aiText = "", buffer = "";
-      while (true) { const { done, value } = await reader.read(); if (done) break; buffer += decoder.decode(value, { stream: true }); const lines = buffer.split("\n"); buffer = lines.pop() || ""; for (const line of lines) { if (!line.startsWith("data: ")) continue; try { const data = JSON.parse(line.slice(6)); if (data.dimensionScores) { engineResult = data; sessionStorage.setItem("bounce-diagnosis", JSON.stringify({ ...data, aiAnalysis: "" })); sessionStorage.setItem("bounce-answers", JSON.stringify(state.answers)); } else if (data.text) { aiText += data.text; } } catch {} } }
-      if (engineResult) { engineResult.aiAnalysis = aiText; sessionStorage.setItem("bounce-diagnosis", JSON.stringify(engineResult)); }
+      const response = await fetch("/api/diagnose/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers: state.answers }),
+      });
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("无法读取流");
+      const decoder = new TextDecoder();
+      let engineResult: any = null, aiText = "", buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.dimensionScores) {
+              engineResult = data;
+              sessionStorage.setItem("bounce-diagnosis", JSON.stringify({ ...data, aiAnalysis: "" }));
+              sessionStorage.setItem("bounce-answers", JSON.stringify(state.answers));
+            } else if (data.text) {
+              aiText += data.text;
+            }
+          } catch {}
+        }
+      }
+      if (engineResult) {
+        engineResult.aiAnalysis = aiText;
+        sessionStorage.setItem("bounce-diagnosis", JSON.stringify(engineResult));
+      }
       router.push("/report");
-    } catch { alert("诊断生成失败，请稍后重试。"); dispatch({ type: "SET_SUBMITTING", value: false }); }
+    } catch {
+      alert("诊断生成失败，请稍后重试。");
+      dispatch({ type: "SET_SUBMITTING", value: false });
     }
   };
 
