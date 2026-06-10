@@ -705,18 +705,21 @@ const KB_PART4: KBEntry[] = [
     condition: "垂直跳跃（常规向下再向上）高度 ≥ 或 ≈ 反应性跳跃（从12英寸箱子跳下再跳起）高度",
     diagnosis: "反应性力量（拉长-缩短周期效率）不足，侧重于吸收和利用弹性/反射力的能力存在缺陷",
     target: "反应力量",
+    rationale: "反应力量不足意味着无法有效利用肌肉肌腱的弹性势能，限制弹跳表现。",
   },
   {
     id: "diagnosis_002", type: "weakness_diagnosis",
     condition: "反应性跳跃高度比垂直跳跃（常规）高20%或更多，且随着箱子高度增加（>18英寸），跳跃高度持续增加",
     diagnosis: "反应性/弹性能力非常高效，基础力量相对不足。通过增加肌肉量和基础力量可以获得最大收益",
     target: "力量",
+    rationale: "弹性能力优秀但力量基础薄弱，加强最大力量训练可获得更大弹跳提升。",
   },
   {
     id: "diagnosis_003", type: "weakness_diagnosis",
     condition: "最大深蹲重量 < 1.5倍体重",
     diagnosis: "基础力量是当前的主要限制因素，也是首要发展目标。此诊断优先于任何反应性测试结果",
     target: "力量",
+    rationale: "基础力量不足是弹跳提升的最大瓶颈，必须优先发展力量。",
   },
   {
     id: "exercise_001_4", type: "exercise",

@@ -102,7 +102,7 @@ function renderMarkdown(md: string): string {
   html = html.replace(/\n\n/g, "</p><p class='text-sm text-slate-300 leading-relaxed mb-3'>");
   html = "<p class='text-sm text-slate-300 leading-relaxed mb-3'>" + html + "</p>";
   // 连续列表项包裹
-  html = html.replace(/(<li[^>]*>.*?<\/li>)\s*(?=<li)/gs, "$1");
+  html = html.replace(/(<li[^>]*>.*?<\/li>)\s*(?=<li)/g, "$1");
   html = html.replace(/((?:<li[^>]*>.*?<\/li>\s*)+)/g, "<ul class='list-disc ml-5 my-2 text-slate-300'>$1</ul>");
   return html;
 }
