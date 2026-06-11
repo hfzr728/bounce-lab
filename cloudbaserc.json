@@ -1,0 +1,12 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "envId": "bouncelab-d5glxli5o912776b1",
+  "app": {
+    "serviceName": "bouncelab",
+    "framework": "next",
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "outputDir": ".next",
+    "deployPath": "bouncelab"
+  }
+}
