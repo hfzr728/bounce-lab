@@ -35,23 +35,166 @@ async function callAI(systemPrompt, userPrompt) {
   }
 }
 
-// ---- 简易规则引擎 ----
+// ---- 完整规则引擎（与 lib/diagnosis/rule-engine.ts 同步）----
+function scoreByRange(v, n) { for (const r of n) if (v>=r.min&&v<r.max) return r.s; return 50; }
+const CMJ_M=[{min:0,max:25,s:10},{min:25,max:35,s:25},{min:35,max:45,s:45},{min:45,max:55,s:65},{min:55,max:65,s:80},{min:65,max:100,s:95}];
+const CMJ_F=[{min:0,max:20,s:10},{min:20,max:28,s:25},{min:28,max:35,s:45},{min:35,max:42,s:65},{min:42,max:50,s:80},{min:50,max:100,s:95}];
+const BF_M=[{min:0,max:10,s:95},{min:10,max:14,s:85},{min:14,max:18,s:70},{min:18,max:24,s:50},{min:24,max:30,s:30},{min:30,max:100,s:15}];
+const BF_F=[{min:0,max:18,s:95},{min:18,max:22,s:85},{min:22,max:28,s:70},{min:28,max:35,s:45},{min:35,max:40,s:25},{min:40,max:100,s:10}];
+
 function simpleScore(id, answer, gender) {
-  const s = String(answer); const n = Number(answer) || 0;
-  // Body comp
-  if (id === "b05") { const norms = gender === "female" ? [{ min:0,max:20,s:90},{ min:20,max:25,s:80},{ min:25,max:30,s:65},{ min:30,max:35,s:45},{ min:35,max:100,s:25}] : [{ min:0,max:12,s:90},{ min:12,max:18,s:80},{ min:18,max:24,s:65},{ min:24,max:30,s:40},{ min:30,max:100,s:20}]; for(const r of norms) if(n>=r.min&&n<r.max) return r.s; return 50; }
-  // Strength
-  if (id==="s01") { if(n>=180)return 95; if(n>=140)return 80; if(n>=100)return 60; if(n>=60)return 40; if(n>0)return 20; return 15; }
-  if (id==="s02") { if(n>=200)return 95; if(n>=160)return 80; if(n>=120)return 60; if(n>=70)return 40; if(n>0)return 20; return 15; }
-  if (id==="s03") { if(n>=140)return 95; if(n>=100)return 80; if(n>=70)return 60; if(n>=40)return 40; if(n>0)return 20; return 15; }
-  if (id==="s05") { if(n>=50)return 90; if(n>=35)return 75; if(n>=20)return 55; if(n>0)return 30; return 20; }
-  // Basic scoring: good answers
-  const goodVals = ["excellent","good","strong","high","elite","advanced","long_legs","balanced","normal","none","small"];
-  const badVals = ["concern","weak","low","flat","poor","large","pain","yes_injury"];
-  if (goodVals.includes(s)) return 85;
-  if (badVals.includes(s)) return 35;
-  // Numeric scoring : higher is generally better
-  if (!isNaN(n) && n > 0) return Math.min(95, Math.max(20, Math.round(n / 2)));
+  const v=String(answer);const n=Number(answer)||0;
+  if(id==="b05")return scoreByRange(n,gender==="female"?BF_F:BF_M);
+  if(id==="b06")return v==="excellent"?90:v==="good"?70:v==="concern"?30:50;
+  if(id==="b07")return v==="small"?85:v==="medium"?75:v==="large"?45:60;
+  if(id==="p02")return v==="long_legs"?90:v==="balanced"?75:v==="long_torso"?45:60;
+  if(id==="p03")return v==="long"?90:v==="medium"?70:v==="short"?35:60;
+  if(id==="p04")return v==="normal"?85:v==="high"?60:v==="flat"?40:60;
+  if(id==="p05")return v==="excellent"?90:v==="good"?75:v==="average"?50:25;
+  if(id==="p06")return v==="none"?85:v==="leg_align"?50:60;
+  if(id==="p07")return v==="high"?85:v==="moderate"?70:v==="low"?45:55;
+  if(id==="s01"){if(n>=180)return 95;if(n>=140)return 80;if(n>=100)return 60;if(n>=60)return 40;if(n>0)return 20;return 15;}
+  if(id==="s02"){if(n>=200)return 95;if(n>=160)return 80;if(n>=120)return 60;if(n>=70)return 40;if(n>0)return 20;return 15;}
+  if(id==="s03"){if(n>=140)return 95;if(n>=100)return 80;if(n>=70)return 60;if(n>=40)return 40;if(n>0)return 20;return 15;}
+  if(id==="s04"){if(n>=100)return 95;if(n>=75)return 80;if(n>=50)return 60;if(n>=30)return 40;if(n>0)return 20;return 15;}
+  if(id==="s05"){if(n>=50)return 90;if(n>=35)return 75;if(n>=20)return 55;if(n>0)return 30;return 20;}
+  if(id==="s06")return v==="elite"?95:v==="advanced"?75:v==="intermediate"?50:v==="novice"?25:10;
+  if(id==="s07")return v==="strong"?85:v==="good"?65:v==="average"?45:25;
+  if(id==="s08")return v==="balanced"?90:v==="slight"?70:v==="moderate"?40:v==="severe"?15:50;
+  if(id==="s09")return v==="excellent"?85:v==="good"?65:v==="average"?40:20;
+  if(id==="s10"){if(n>=40)return 90;if(n>=25)return 75;if(n>=10)return 55;if(n>0)return 30;return 20;}
+  if(id==="s11")return v==="excellent"?90:v==="good"?70:v==="average"?45:20;
+  if(id==="s12")return v==="excellent"?85:v==="good"?65:v==="average"?45:25;
+  if(id==="sp01")return scoreByRange(n,gender==="female"?CMJ_F:CMJ_M);
+  if(id==="sp02"){if(n>=55)return 90;if(n>=40)return 70;if(n>=30)return 50;if(n>=20)return 30;if(n>0)return 15;return 15;}
+  if(id==="sp03"){if(n>=330)return 95;if(n>=300)return 80;if(n>=270)return 60;if(n>=240)return 40;if(n>0)return 20;return 15;}
+  if(id==="sp04"){if(n>=280)return 95;if(n>=250)return 80;if(n>=220)return 60;if(n>=190)return 45;if(n>0)return 25;return 15;}
+  if(id==="sp05"){if(n>0&&n<=4.0)return 95;if(n<=4.5)return 75;if(n<=5.0)return 55;if(n>5.0)return 30;return 35;}
+  if(id==="sp06")return v==="explosive"?90:v==="good"?70:v==="slow_str"?45:25;
+  if(id==="sp07")return v==="excellent"?90:v==="good"?70:v==="poor"?35:50;
+  if(id==="sp08")return v==="stable"?90:v==="slight"?70:v==="moderate"?45:v==="big"?25:50;
+  if(id==="sp09")return v==="balanced"?85:v==="velo_dom"?65:v==="force_dom"?60:55;
+  if(id==="sp10")return v==="balanced"?90:v==="force_deficit"?50:v==="velocity_deficit"?50:55;
+  if(id==="sp11")return v==="balanced"?85:v==="strength_heavy"?65:v==="plyo_heavy"?60:55;
+  if(id==="m01"){if(n>=20)return 90;if(n>=10)return 75;if(n>=0)return 60;if(n>=-10)return 45;if(n>=-20)return 30;return 20;}
+  if(id==="m02")return v==="excellent"?90:v==="good"?75:v==="average"?50:v==="poor"?20:50;
+  if(id==="m03")return v==="excellent"?90:v==="good"?75:v==="average"?50:25;
+  if(id==="m04")return v==="excellent"?90:v==="good"?75:v==="average"?50:25;
+  if(id==="m05")return v==="excellent"?90:v==="good"?75:v==="average"?50:v==="tight"?20:50;
+  if(id==="m06")return v==="excellent"?90:v==="good"?75:v==="average"?50:20;
+  if(id==="m07")return v==="3"?90:v==="2"?60:v==="1"?30:50;
+  if(id==="m08")return v==="passed"?90:v==="asymmetry"?40:v==="low"?30:50;
+  if(id==="e01")return v==="excellent"?90:v==="good"?75:v==="average"?50:25;
+  if(id==="e02")return v==="excellent"?90:v==="good"?70:v==="average"?45:25;
+  if(id==="e03")return v==="90+"?90:v==="60-90"?75:v==="30-60"?55:30;
+  if(id==="e04")return v==="1d"?90:v==="2-3d"?70:v==="3-5d"?40:20;
+  if(id==="e05")return v==="frequent"?85:v==="occasional"?65:v==="rare"?40:15;
+  if(id==="e06")return v==="<50"?90:v==="50-60"?75:v==="60-70"?55:v===">70"?30:50;
+  if(id==="ex01")return v==="5+"?95:v==="3-5"?80:v==="1-3"?60:v==="0.5-1"?40:v==="<0.5"?20:10;
+  if(id==="ex02")return v==="systematic"?90:v==="casual"?60:v==="some"?35:10;
+  if(id==="ex03")return v==="structured"?90:v==="regular"?70:v==="irregular"?40:10;
+  if(id==="ex07")return v==="ramp"?95:v==="good"?75:v==="brief"?40:10;
+  if(id==="ex08")return v==="systematic"?90:v==="basic"?65:v==="sometimes"?40:10;
+  if(id==="ex09")return v==="pro"?90:v==="basic"?65:35;
+  if(id==="ex10")return v==="detailed"?90:v==="basic"?65:v==="sometimes"?40:15;
+  if(id==="l01")return v==="8-9"?95:v==="7-8"?75:v==="6-7"?50:20;
+  if(id==="l02")return v==="excellent"?95:v==="good"?75:v==="average"?50:20;
+  if(id==="l03")return v==="strict"?90:v==="moderate"?75:v==="average"?50:20;
+  if(id==="l04")return Math.max(10,110-n*10);
+  if(id==="l05")return v==="no"?95:v==="occasional"?50:10;
+  if(id==="l06")return v==="no"?95:v==="rare"?70:v==="weekly"?40:10;
+  if(id==="l07"){const a=Array.isArray(v)?v:[];const c=a.filter(x=>x!=="none").length;return Math.min(95,25+c*14);}
+  if(id==="l08")return v==="<4"?85:v==="4-8"?70:v==="8-12"?45:25;
+  if(id==="l09")return v==="regular"?90:v==="occasional"?65:v==="sedentary"?40:15;
+  if(id==="l10")return v==="systematic"?85:v==="basic"?65:45;
+  if(id==="a01")return v==="6-7"?95:v==="4-5"?80:v==="3"?60:v==="2"?40:25;
+  if(id==="a02")return v==="120+"?90:v==="90-120"?80:v==="60-90"?60:v==="45-60"?40:25;
+  if(id==="a03")return v==="pro"?95:v==="gym"?80:v==="home_gym"?55:35;
+  if(id==="a07")return v==="coach"?90:v==="partner"?70:45;
+  if(id==="a08")return v==="max"?90:v==="high"?80:v==="moderate"?55:30;
+  if(id==="a09")return v==="proficient"?95:v==="novice"?60:30;
+  if(id==="ex04"){const a=Array.isArray(v)?v:[v];if(a.includes("none"))return 15;let s=50;if(a.includes("track_jump")||a.includes("volleyball"))s+=20;if(a.includes("basketball")||a.includes("track_sprint"))s+=15;if(a.includes("weightlifting"))s+=10;return Math.min(95,s);}
+  if(id.startsWith("st")){
+    if(id==="st05")return scoreByRange(n,gender==="female"?BF_F:BF_M);
+    if(id==="st07")return v==="small"?85:v==="medium"?75:v==="large"?45:60;
+    if(id==="st08")return v==="long_legs"?90:v==="balanced"?75:v==="long_torso"?45:60;
+    if(id==="st09")return v==="normal"?85:v==="high"?60:v==="flat"?40:60;
+    if(id==="st10")return v==="excellent"?90:v==="good"?75:v==="average"?50:25;
+    if(id==="st11"){const a=Array.isArray(v)?v:[];return a.includes("none")?85:a.length>=2?45:65;}
+    if(id==="st12")return v==="elite"?95:v==="advanced"?75:v==="intermediate"?50:v==="novice"?25:10;
+    if(id==="st13")return v==="elite"?95:v==="advanced"?75:v==="intermediate"?50:v==="novice"?25:10;
+    if(id==="st14")return v==="excellent"?90:v==="good"?70:v==="average"?50:v==="weak"?25:40;
+    if(id==="st15")return v==="strong"?85:v==="good"?65:v==="average"?45:25;
+    if(id==="st16")return v==="balanced"?90:v==="slight"?70:v==="moderate"?40:v==="severe"?15:50;
+    if(id==="st17")return v==="excellent"?85:v==="good"?65:v==="average"?40:20;
+    if(id==="st18")return scoreByRange(n,gender==="female"?CMJ_F:CMJ_M);
+    if(id==="st19"){if(n>=330)return 95;if(n>=300)return 80;if(n>=270)return 60;if(n>=240)return 40;if(n>0)return 20;return 15;}
+    if(id==="st20"){if(n>=280)return 95;if(n>=250)return 80;if(n>=220)return 60;if(n>=190)return 45;if(n>0)return 25;return 15;}
+    if(id==="st21"){if(n>0&&n<=4.0)return 95;if(n<=4.5)return 75;if(n<=5.0)return 55;if(n>5.0)return 30;return 35;}
+    if(id==="st22")return v==="explosive"?90:v==="good"?70:v==="slow_str"?45:25;
+    if(id==="st23")return v==="balanced"?85:v==="velo_dom"?65:v==="force_dom"?60:55;
+    if(id==="st24")return v==="balanced"?85:v==="strength_heavy"?65:v==="plyo_heavy"?60:55;
+    if(id>="st25"&&id<="st31"){if(v==="3")return 90;if(v==="2")return 60;if(v==="1")return 30;if(v==="0")return 10;return 50;}
+    if(id==="st32"){if(n>=20)return 90;if(n>=10)return 75;if(n>=0)return 60;if(n>=-10)return 45;return 30;}
+    if(id==="st33")return v==="excellent"?90:v==="good"?75:v==="average"?50:v==="poor"?20:50;
+    if(id==="st34")return v==="excellent"?90:v==="good"?75:v==="average"?50:20;
+    if(id==="st35")return v==="excellent"?90:v==="good"?70:v==="average"?45:20;
+    if(id==="st36")return v==="excellent"?90:v==="good"?70:v==="average"?45:25;
+    if(id==="st37")return v==="fast"?90:v==="normal"?70:v==="slow"?40:20;
+    if(id==="st38")return v==="excellent"?90:v==="good"?70:v==="average"?50:v==="poor"?25:50;
+    if(id==="st39")return v==="5y+"?95:v==="2-5y"?75:v==="1-2y"?55:v==="6m-1y"?35:15;
+    if(id==="st40")return v==="yes_sys"?85:v==="yes_casual"?55:25;
+    if(id==="st41"){const a=Array.isArray(v)?v:[];return a.includes("none")?90:Math.max(20,90-a.length*15);}
+    if(id==="st42")return v==="never"?95:v==="old"?75:v==="1y"?55:v==="6m"?30:15;
+    if(id==="st43")return v==="yes_full"?90:v==="yes_brief"?70:v==="occasional"?45:15;
+    if(id==="st44")return v==="8+"?95:v==="7-8"?75:v==="6-7"?45:20;
+    if(id==="st45")return v==="good"?90:v==="average"?60:30;
+    if(id==="st46")return v==="good"?90:v==="average"?65:35;
+    if(id==="st47")return Math.max(10,110-n*10);
+    if(id==="st48")return v==="frequent"?90:v==="occasional"?65:v==="rare"?40:15;
+    if(id==="st49")return v==="5-7"?95:v==="3-4"?75:35;
+    if(id==="st50")return v==="90+"?90:v==="60-90"?75:v==="30-60"?50:30;
+    if(id==="st51")return v==="full_gym"?95:v==="basic"?65:40;
+    if(id==="st52")return v==="20+"?95:v==="10-20"?80:v==="5-10"?65:50;
+    if(id==="st54")return v==="proficient"?95:v==="novice"?60:30;
+    return 50;
+  }
+  if(id.startsWith("bb")){
+    let r=50;
+    if(id==="bb05")r=Math.round(110-n*10);
+    else if(id==="bb06")r=v==="small"?85:v==="medium"?75:50;
+    else if(id==="bb08"){if(n>0&&n<=6.5)r=90;else if(n<=7.5)r=70;else if(n<=9)r=45;else if(n>9)r=25;else r=35;}
+    else if(id==="bb09"){if(n>=260)r=95;else if(n>=230)r=75;else if(n>=200)r=55;else if(n>=170)r=35;else if(n>0)r=20;else r=15;}
+    else if(id==="bb10"){if(n>=15)r=90;else if(n>=5)r=70;else if(n>=-5)r=50;else if(n>=-20)r=30;else r=20;}
+    else if(id==="bb11")r=v==="high"?90:v==="good"?70:v==="mid"?45:v==="low"?20:35;
+    else if(id==="bb12")r=v==="excellent"?90:v==="good"?70:v==="average"?45:v==="poor"?20:35;
+    else if(id==="bb13")r=v==="strong"?90:v==="good"?70:v==="average"?45:20;
+    else if(id==="bb14")r=v==="strong"?85:v==="good"?65:v==="average"?40:20;
+    else if(id==="bb15")r=v==="balanced"?90:v==="slight"?65:v==="moderate"?35:40;
+    else if(id==="bb16")r=v==="excellent"?90:v==="good"?70:v==="average"?45:20;
+    else if(id==="bb17")r=v==="fast"?90:v==="good"?70:v==="average"?45:25;
+    else if(id==="bb18")r=v==="power"?85:v==="balanced"?70:v==="endurance"?55:30;
+    else if(id==="bb19")r=v==="excellent"?90:v==="good"?70:v==="average"?45:20;
+    else if(id==="bb20")r=v==="excellent"?90:v==="good"?70:v==="average"?45:20;
+    else if(id==="bb21")r=v==="frequent"?85:v==="occasional"?60:v==="rare"?30:10;
+    else if(id==="bb22")r=v==="yes_sys"?90:v==="yes_casual"?55:20;
+    else if(id==="bb24")r=v==="current"?10:v==="6m"?30:v==="1y"?55:v==="old"?75:v==="never"?90:50;
+    else if(id==="bb25")r=v==="8+"?90:v==="7-8"?75:v==="6-7"?50:20;
+    else if(id==="bb26")r=v==="good"?85:v==="average"?55:25;
+    else if(id==="bb27")r=Math.max(10,110-n*10);
+    else if(id==="bb28")r=v==="none"?95:v==="occasional"?55:15;
+    else if(id==="bb29")r=v==="4-5"?85:v==="3"?65:v==="2"?45:25;
+    else if(id==="bb30")r=v==="90+"?85:v==="60-90"?70:v==="45-60"?50:30;
+    else if(id==="bb31")r=v==="gym"?85:v==="home"?60:35;
+    else if(id==="bb34")r=v==="max"?90:v==="high"?75:50;
+    else if(id==="bb35")r=v==="proficient"?95:v==="novice"?60:30;
+    return Math.min(95,r+8);
+  }
+  const gv=["excellent","good","strong","high","elite","advanced","long_legs","balanced","normal","none","small"];
+  const bv=["concern","weak","low","flat","poor","large","pain","yes_injury"];
+  if(gv.includes(v))return 85;
+  if(bv.includes(v))return 35;
+  if(!isNaN(n)&&n>0)return Math.min(95,Math.max(20,Math.round(n/2)));
   return 60;
 }
 
