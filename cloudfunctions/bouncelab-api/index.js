@@ -398,13 +398,19 @@ exports.main = async (event, context) => {
       const aiAnalysis = await callAI(DIAGNOSIS_SYSTEM, userPrompt);
       result = { dimensionScores, overallScore, strengths, weaknesses, injuryRisk, aiAnalysis, answers, version: "scf-v1" };
     } else if (path.includes("/plan") && !path.includes("/revise")) {
-      const { planInput, weaknesses, injuryRisk, diagnosisSummary } = body;
+      let { planInput, weaknesses, injuryRisk, diagnosisSummary, answers } = body;
+      // 前端发送 answers 而非 planInput，自动构建训练条件摘要
+      if (!planInput && answers && Object.keys(answers).length > 0) {
+        const relevantKeys = ["a01","a02","a03","a04","a05","a06","a07","a08","a09","s01","s02","s03","s04","s05","b01","b02","b03","b04","b05","sp01","sp02","sp03","sp04","ex01","ex02","ex03","l01","l02","l04","l05","l06"];
+        planInput = Object.entries(answers).filter(([k]) => relevantKeys.includes(k)).map(([k,v]) => `${k}: ${v}`).join("; ");
+        if (!planInput) planInput = JSON.stringify(answers);
+      }
       if (!planInput) {
         return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: "缺少训练条件数据" }) };
       }
       const userPrompt = `【训练条件】${planInput}\n【薄弱方向】${weaknesses || ""}\n【受伤风险】${injuryRisk || ""}\n【诊断摘要】${diagnosisSummary || ""}\n\n请生成完整的第1周到第12周个性化训练计划。全部中文。`;
       const plan = await callAI(PLANNING_SYSTEM, userPrompt);
-      result = { plan, version: "scf-v1" };
+      result = { aiGenerated: plan, plan, version: "scf-v1" };
     } else if (path.includes("/qa")) {
       const { question } = body;
       if (!question || question.trim().length < 2) {
