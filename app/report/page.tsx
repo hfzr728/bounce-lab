@@ -5,8 +5,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { RadarChart } from "@/components/report/radar-chart";
-import { Typewriter } from "@/components/ui/typewriter";
 import type { DiagnosisResult } from "@/lib/questionnaire/types";
 
 export default function ReportPage() {
@@ -20,6 +20,34 @@ export default function ReportPage() {
       try {
         const parsed = JSON.parse(stored);
         setData(parsed);
+        // Auto-save diagnosis to localStorage for plan generation
+        const savedDiag = {
+          type: "diagnosis",
+          date: new Date().toISOString(),
+          version: parsed.version || "unknown",
+          summary: parsed.diagnosisSummary || `综合评分 ${parsed.overallScore || "?"}/100`,
+          overallScore: parsed.overallScore,
+          weaknesses: parsed.weaknesses,
+          strengths: parsed.strengths,
+          injuryRisk: parsed.injuryRisk,
+          answers: parsed.answers,
+          diagnosisSummary: parsed.diagnosisSummary,
+          fullDiagnosis: parsed,
+        };
+        // Deduplicate: check by summary content (ignore date)
+        let isDup = false;
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k?.startsWith("bounce-saved-d-")) {
+            try {
+              const d = JSON.parse(localStorage.getItem(k) || "");
+              if (d.summary === savedDiag.summary) { isDup = true; break; }
+            } catch {}
+          }
+        }
+        if (!isDup) {
+          localStorage.setItem("bounce-saved-d-" + Date.now(), JSON.stringify(savedDiag));
+        }
       } catch {
         // ignore
       }
@@ -70,7 +98,7 @@ export default function ReportPage() {
       : "text-green-600 bg-green-50 border-green-200";
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto px-4 py-8 relative">
       <div className="text-center mb-10">
         <h1 className="text-3xl font-extrabold text-white mb-2">
           📊 弹跳能力诊断报告
@@ -139,61 +167,36 @@ export default function ReportPage() {
       <div className="mt-8 bg-[#1e293b] border border-slate-700/50 rounded-2xl p-8">
         <h3 className="text-lg font-bold text-white mb-4">🤖 AI 深度分析</h3>
         <div className="text-sm leading-relaxed text-slate-300 whitespace-pre-wrap">
-          <Typewriter text={data.aiAnalysis} speed={20} />
+          {data.aiAnalysis}
         </div>
       </div>
 
       <div className="flex flex-wrap gap-4 mt-10 justify-center">
-        <button
-          onClick={async () => {
-            const btn = document.activeElement as HTMLButtonElement;
-            if (btn) { btn.disabled = true; btn.textContent = "⏳ 生成中..."; }
-            const answersStr = sessionStorage.getItem("bounce-answers");
-            if (!answersStr) return;
-            const answers = JSON.parse(answersStr);
-
-            const res = await fetch("/api/plan", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                answers,
-                weaknesses: data.weaknesses,
-                injuryRisk: data.injuryRisk,
-                diagnosisSummary: `综合评分 ${data.overallScore}/100，优势：${data.strengths.join("、")}`,
-              }),
-            });
-            const planData = await res.json();
-            sessionStorage.setItem("bounce-plan", JSON.stringify(planData));
-            router.push("/plan");
-          }}
+        <Link
+          href="/profile"
+          className="px-8 py-4 bg-slate-700/50 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-all border border-slate-600/30"
+        >
+          ← 返回个人主页
+        </Link>
+        <Link
+          href="/plan"
           className="px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-[#0a0a14] font-bold rounded-xl transition-all shadow-lg shadow-amber-500/25"
         >
-          📋 生成我的训练计划 →
-        </button>
+          📋 生成训练计划 →
+        </Link>
         <button
           onClick={() => {
-            const now = new Date().toLocaleString("zh-CN");
-            const key = `bounce-saved-d-${Date.now()}`;
-            localStorage.setItem(key, JSON.stringify({
-              type: "diagnosis", date: now, version: "", overallScore: data.overallScore,
-              summary: `综合评分 ${data.overallScore}/100，优势：${data.strengths.join("、")}，短板：${data.weaknesses.join("、")}`,
-              fullDiagnosis: data,
-            }));
-            const t = document.createElement("div");
-            t.className = "fixed bottom-6 right-6 z-[9999] px-5 py-3 rounded-xl shadow-lg text-sm font-medium bg-green-600 text-white";
-            t.textContent = "✅ 已保存到个人主页！";
-            document.body.appendChild(t); setTimeout(() => t.remove(), 3000);
+            localStorage.removeItem("bounce-questionnaire-basic");
+            localStorage.removeItem("bounce-questionnaire-standard");
+            localStorage.removeItem("bounce-questionnaire");
+            sessionStorage.removeItem("bounce-diagnosis");
+            sessionStorage.removeItem("bounce-answers");
+            router.push("/assessment");
           }}
-          className="px-8 py-4 bg-slate-700/50 hover:bg-slate-700 text-slate-200 font-bold rounded-xl transition-all border border-slate-600/30"
-        >
-          💾 保存到个人主页
-        </button>
-        <a
-          href="/assessment"
           className="px-8 py-4 bg-slate-700/50 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-all border border-slate-600/30"
         >
           重新评估
-        </a>
+        </button>
       </div>
     </div>
   );

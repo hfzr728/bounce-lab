@@ -5,10 +5,13 @@ import { createPortal } from "react-dom";
 import { useUser, LEVEL_LABELS, type UserProfile } from "@/lib/user/context";
 
 export function UserButton() {
-  const { user, isLoggedIn, login, logout, updateProfile } = useUser();
+  const { user, isLoggedIn, login, logout, findUser } = useUser();
   const [showModal, setShowModal] = useState(false);
+  const [mode, setMode] = useState<"register" | "login">("register");
+  const [error, setError] = useState("");
   const [form, setForm] = useState<Partial<UserProfile>>({
     name: "",
+    password: "",
     avatar: "🏀",
     level: "intermediate",
     weight: 70,
@@ -19,43 +22,67 @@ export function UserButton() {
 
   const AVATARS = ["🏀", "⚡", "🔥", "💪", "🦘", "🏃", "🎯", "🏆"];
 
-  const handleLogin = () => {
-    if (!form.name?.trim()) return;
-    login({ ...form, name: form.name.trim() });
+  const handleRegister = () => {
+    if (!form.name?.trim() || !form.password?.trim()) return;
+    // 检查用户是否已存在
+    const existing = findUser(form.name.trim());
+    if (existing) { setError("该昵称已注册，请切换到登录"); return; }
+    login({ ...form, name: form.name.trim(), password: form.password.trim() });
     setShowModal(false);
+    setError("");
+  };
+
+  const handleLogin = () => {
+    if (!form.name?.trim() || !form.password?.trim()) return;
+    const existing = findUser(form.name.trim());
+    if (!existing) { setError("该用户不存在，请先注册"); return; }
+    if (existing.password !== form.password.trim()) { setError("密码错误"); return; }
+    // 登录成功，加载用户数据
+    login({
+      name: form.name.trim(),
+      password: form.password.trim(),
+      avatar: existing.avatar,
+      level: "intermediate",
+      weight: 70, height: 175, age: 22,
+      goal: "提升垂直弹跳",
+    });
+    setShowModal(false);
+    setError("");
   };
 
   if (!isLoggedIn) {
     return (
       <>
-        <button onClick={() => setShowModal(true)} className="text-sm text-slate-400 hover:text-amber-400 transition-colors border border-slate-600 hover:border-amber-500/50 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
+        <button onClick={() => { setShowModal(true); setMode("register"); setError(""); }} className="text-sm text-slate-400 hover:text-amber-400 transition-colors border border-slate-600 hover:border-amber-500/50 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
           <span>👤</span> 登录
         </button>
 
         {showModal && createPortal(
           <div className="fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
             <div className="bg-[#1e293b] border border-slate-600 rounded-2xl max-w-[320px] w-full p-5 shadow-2xl relative" onClick={e => e.stopPropagation()}>
-              {/* Close button */}
               <button onClick={() => setShowModal(false)} className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-slate-500 hover:text-slate-200 hover:bg-slate-700 transition-colors text-sm">✕</button>
-              <h2 className="text-base font-bold text-slate-100 mb-0.5">👋 创建你的档案</h2>
-              <p className="text-xs text-slate-500 mb-4">数据仅保存在本地浏览器</p>
 
-              {/* Avatar picker */}
-              <div className="mb-3">
-                <div className="flex gap-1.5 flex-wrap">
-                  {AVATARS.map(a => (
-                    <button key={a} onClick={() => setForm(f => ({ ...f, avatar: a }))}
-                      className={`w-8 h-8 text-lg rounded-lg flex items-center justify-center transition-all ${
-                        form.avatar === a ? "bg-amber-500/20 border-2 border-amber-500/50 scale-110" : "bg-slate-800 border border-slate-700 hover:border-slate-500"
-                      }`}>{a}</button>
-                  ))}
-                </div>
+              {/* 注册/登录切换 */}
+              <div className="flex mb-4 bg-slate-800 rounded-lg p-0.5">
+                <button onClick={() => { setMode("register"); setError(""); }}
+                  className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${mode === "register" ? "bg-amber-500/20 text-amber-400" : "text-slate-500"}`}>注册</button>
+                <button onClick={() => { setMode("login"); setError(""); }}
+                  className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${mode === "login" ? "bg-amber-500/20 text-amber-400" : "text-slate-500"}`}>登录</button>
               </div>
 
-              {/* Name */}
+              <h2 className="text-base font-bold text-slate-100 mb-0.5">{mode === "register" ? "👋 创建新账号" : "🔑 登录账号"}</h2>
+              <p className="text-xs text-slate-500 mb-4">数据仅保存在本地浏览器</p>
+
+              {error && <p className="text-xs text-red-400 mb-3 bg-red-500/10 px-3 py-2 rounded-lg">{error}</p>}
+
               <div className="mb-2.5">
                 <input type="text" value={form.name || ""} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="你的昵称" className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-amber-500/50" />
+                  placeholder="昵称" className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-amber-500/50" />
+              </div>
+              <div className="mb-2.5">
+                <input type="password" value={form.password || ""} onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                  placeholder={mode === "register" ? "设置密码" : "输入密码"}
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-amber-500/50" />
               </div>
 
               {/* Level */}
@@ -95,9 +122,9 @@ export function UserButton() {
                   placeholder="训练目标，如：扣篮" className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-amber-500/50" />
               </div>
 
-              <button onClick={handleLogin} disabled={!form.name?.trim()}
+              <button onClick={mode === "register" ? handleRegister : handleLogin} disabled={!form.name?.trim() || !form.password?.trim()}
                 className="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold rounded-xl text-sm transition-all hover:from-amber-400 hover:to-amber-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                开始使用 BounceLab →
+                {mode === "register" ? "注册并开始使用 →" : "登录 →"}
               </button>
             </div>
           </div>,

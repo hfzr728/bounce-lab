@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header, Footer } from "@/components/layout/shared";
 import { UserProvider } from "@/lib/user/context";
 import { ToastProvider } from "@/components/ui/toast";
+import { FeedbackButton } from "@/components/feedback/feedback-button";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,6 +37,7 @@ export default function RootLayout({
             <Header />
             <main className="flex-1">{children}</main>
             <Footer />
+            <FeedbackButton />
           </ToastProvider>
         </UserProvider>
       </body>

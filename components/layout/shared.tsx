@@ -13,9 +13,10 @@ export function Header() {
         </a>
         <nav className="flex items-center gap-0.5 md:gap-5 text-xs md:text-sm font-medium flex-wrap">
           {[
-            ["首页", "/"], ["评估", "/assessment"], ["组装", "/program-builder"],
-            ["日志", "/training-log"], ["追踪", "/jump-tracker"],
-            ["动作库", "/exercises"], ["问答", "/faq"], ["主页", "/profile"],
+            ["首页", "/"], ["评估", "/assessment"], ["生成计划", "/plan"], ["训练计划", "/program-builder"],
+            ["追踪", "/jump-tracker"],
+            ["动作库", "/exercises"], ["百科", "/qa"], ["康复", "/rehab"],
+            ["饮食", "/body-comp"], ["主页", "/profile"],
           ].map(([label, href]) => (
             <a key={href} href={href} className="text-gray-400 hover:text-amber-400 transition-colors px-2 py-1">
               {label}
@@ -32,7 +33,7 @@ export function Footer() {
   return (
     <footer className="border-t border-white/5 mt-20">
       <div className="max-w-6xl mx-auto px-4 py-8 text-center text-sm text-gray-500">
-        <p>BOUNCELAB — 弹跳训练诊断平台 | 数据仅供参考，请结合专业教练指导</p>
+        <p>BOUNCELAB — 弹跳评估诊断与训练计划平台 | 数据仅供参考，请结合专业教练指导</p>
       </div>
     </footer>
   );

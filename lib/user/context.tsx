@@ -4,10 +4,11 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 
 export interface UserProfile {
   name: string;
-  avatar: string; // emoji
+  password: string;
+  avatar: string;
   level: "beginner" | "intermediate" | "advanced";
-  weight: number; // kg
-  height: number; // cm
+  weight: number;
+  height: number;
   age: number;
   goal: string;
   joinedAt: string;
@@ -19,12 +20,16 @@ interface UserContextType {
   login: (profile: Partial<UserProfile>) => void;
   logout: () => void;
   updateProfile: (updates: Partial<UserProfile>) => void;
+  getUserDataKey: () => string;
+  findUser: (name: string) => { password: string; avatar: string } | null;
 }
 
 const STORAGE_KEY = "bouncelab_user";
+const USERS_KEY = "bouncelab_users"; // 存储所有注册用户
 
 const DEFAULT_USER: UserProfile = {
   name: "",
+  password: "",
   avatar: "🏀",
   level: "intermediate",
   weight: 70,
@@ -46,6 +51,8 @@ const UserContext = createContext<UserContextType>({
   login: () => {},
   logout: () => {},
   updateProfile: () => {},
+  getUserDataKey: () => "",
+  findUser: () => null,
 });
 
 export function UserProvider({ children }: { children: ReactNode }) {
@@ -80,7 +87,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
       ...profile,
       joinedAt: new Date().toISOString(),
     };
+    // 保存到用户列表
+    try {
+      const users = JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
+      users[newUser.name] = { password: newUser.password, avatar: newUser.avatar, level: newUser.level, joinedAt: newUser.joinedAt };
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    } catch {}
+    // 移除密码后才存 session
+    const { password: _, ...sessionUser } = newUser;
     setUser(newUser);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessionUser));
   }, []);
 
   const logout = useCallback(() => {
@@ -91,8 +107,20 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setUser(prev => prev ? { ...prev, ...updates } : null);
   }, []);
 
+  const getUserDataKey = useCallback(() => {
+    if (!user) return "";
+    return `bouncelab_${user.name}_${user.password}_`;
+  }, [user]);
+
+  const findUser = useCallback((name: string) => {
+    try {
+      const users = JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
+      return users[name] || null;
+    } catch { return null; }
+  }, []);
+
   return (
-    <UserContext.Provider value={{ user, isLoggedIn: !!user, login, logout, updateProfile }}>
+    <UserContext.Provider value={{ user, isLoggedIn: !!user, login, logout, updateProfile, getUserDataKey, findUser }}>
       {children}
     </UserContext.Provider>
   );

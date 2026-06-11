@@ -13,6 +13,8 @@ interface JumpRecord {
 export default function JumpTrackerPage() {
   const [records, setRecords] = useState<JumpRecord[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
+  const [chartMetric, setChartMetric] = useState<"cmj" | "sj" | "approach" | "broadJump">("cmj");
   const [form, setForm] = useState<Omit<JumpRecord, "id">>({
     date: new Date().toISOString().split("T")[0], cmj: 0, sj: 0, approach: 0, broadJump: 0, notes: ""
   });
@@ -52,6 +54,34 @@ export default function JumpTrackerPage() {
         </button>
       </div>
 
+      {/* 测试方法指南 */}
+      <div className="mb-6">
+        <button onClick={() => setShowGuide(!showGuide)}
+          className="text-xs text-amber-400 hover:text-amber-300 flex items-center gap-1 mb-2">
+          {showGuide ? "▲" : "▼"} 不知道怎么测？点击查看 CMJ / SJ / 助跑摸高 / 立定跳远 测试方法
+        </button>
+        {showGuide && (
+          <div className="bg-[#1e293b] border border-amber-500/20 rounded-xl p-4 grid md:grid-cols-2 gap-3 text-xs text-slate-400 leading-relaxed">
+            <div>
+              <p className="text-amber-400 font-bold mb-1">🦘 CMJ（反向纵跳 / Countermovement Jump）</p>
+              <p>最常用的弹跳测试。站直后先快速下蹲（反向运动），然后全力向上跳起。测量指尖摸高最高点 — 站立摸高 = 弹跳高度。可用手机慢动作拍摄或摸高测量器。</p>
+            </div>
+            <div>
+              <p className="text-amber-400 font-bold mb-1">🏋️ SJ（蹲跳 / Squat Jump）</p>
+              <p>从半蹲姿势（膝角约90°）静止 2-3 秒后，不借助反向运动直接全力起跳。反映纯向心收缩力量，与 CMJ 对比可判断 SSC 利用效率。CMJ 通常比 SJ 高 3-6cm。</p>
+            </div>
+            <div>
+              <p className="text-amber-400 font-bold mb-1">🏃 助跑摸高（Approach Jump）</p>
+              <p>3-5 步助跑后单脚或双脚起跳摸高。模拟篮球/排球实战弹跳。测量助跑后摸高最高点 — 站立摸高。注意记录是单脚还是双脚起跳。</p>
+            </div>
+            <div>
+              <p className="text-amber-400 font-bold mb-1">📏 立定跳远（Broad Jump）</p>
+              <p>双脚站定后摆臂下蹲，全力向前跳出。测量起跳线到落地最近脚后跟的距离。反映水平爆发力，与垂直弹跳高度相关。</p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* PR 面板 */}
       {records.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -70,20 +100,79 @@ export default function JumpTrackerPage() {
         </div>
       )}
 
-      {/* 简易进度条 */}
-      {records.length >= 2 && (
+      {/* 进步曲线 — 四合一 */}
+      {records.filter(r => Number(r.cmj) > 0 || Number(r.sj) > 0 || Number(r.approach) > 0 || Number(r.broadJump) > 0).length >= 2 && (
         <div className="bg-[#1e293b] border border-slate-700/50 rounded-xl p-5 mb-6">
-          <h3 className="text-sm font-semibold text-slate-300 mb-3">CMJ 进步曲线</h3>
-          <div className="flex items-end gap-1 h-24">
-            {records.map((r, i) => {
-              const h = best("cmj") > 0 ? (Number(r.cmj) / best("cmj")) * 100 : 0;
-              return (
-                <div key={r.id} className="flex-1 flex flex-col items-center gap-1 group relative">
-                  <div className="w-full bg-gradient-to-t from-amber-500 to-amber-400 rounded-t transition-all hover:from-amber-400" style={{ height: `${Math.max(h, 5)}%` }} />
-                  <span className="text-[10px] text-slate-500">{r.date.slice(5)}</span>
-                  <div className="absolute -top-6 opacity-0 group-hover:opacity-100 bg-slate-800 text-slate-200 text-xs px-2 py-0.5 rounded whitespace-nowrap">{r.cmj}cm</div>
-                </div>
-              );
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h3 className="text-sm font-semibold text-slate-300">📈 进步曲线</h3>
+            <div className="flex gap-1 flex-wrap">
+              {([
+                { key: "cmj" as const, label: "CMJ", color: "#f59e0b" },
+                { key: "sj" as const, label: "SJ", color: "#3b82f6" },
+                { key: "approach" as const, label: "助跑", color: "#10b981" },
+                { key: "broadJump" as const, label: "立定跳远", color: "#8b5cf6" },
+              ]).map(m => (
+                <button key={m.key} onClick={() => setChartMetric(m.key)}
+                  className={`px-2 py-0.5 text-xs rounded-full border transition-all ${
+                    chartMetric === m.key
+                      ? "border-current text-slate-900 font-bold"
+                      : "border-slate-600 text-slate-500 hover:border-slate-400"
+                  }`}
+                  style={chartMetric === m.key ? { backgroundColor: m.color, borderColor: m.color } : {}}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="relative h-48 mb-2">
+            <svg className="w-full h-full" viewBox={`0 0 ${(records.filter(r => Number(r[chartMetric]) > 0).length - 1) * 80 + 40} 180`} preserveAspectRatio="xMidYMid meet">
+              {[0, 25, 50, 75, 100].map(pct => (
+                <line key={pct} x1="0" y1={160 - (pct / 100) * 140} x2="100%" y2={160 - (pct / 100) * 140} stroke="#334155" strokeWidth="0.5" />
+              ))}
+              {(() => {
+                const colors: Record<string, string> = { cmj: "#f59e0b", sj: "#3b82f6", approach: "#10b981", broadJump: "#8b5cf6" };
+                const color = colors[chartMetric];
+                const validRecords = records.filter(r => Number(r[chartMetric]) > 0);
+                if (validRecords.length < 2) return null;
+                const maxV = Math.max(...validRecords.map(r => Number(r[chartMetric])));
+                const minV = Math.min(...validRecords.map(r => Number(r[chartMetric])));
+                const range = maxV - minV || 10;
+                const pad = range * 0.15;
+                const points = validRecords.map((r, i) => {
+                  const x = 20 + i * 80;
+                  const y = 160 - ((Number(r[chartMetric]) - (minV - pad)) / (maxV - minV + pad * 2)) * 140;
+                  return { x, y, val: Number(r[chartMetric]), date: r.date.slice(5) };
+                });
+                const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+                return (
+                  <>
+                    <path d={`${linePath} L ${points[points.length - 1].x} 160 L 20 160 Z`} fill={color} opacity="0.1" />
+                    <path d={linePath} stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                    {points.map((p, i) => (
+                      <g key={i}>
+                        <circle cx={p.x} cy={p.y} r="4" fill="#1e293b" stroke={color} strokeWidth="2" />
+                        <text x={p.x} y={p.y - 10} textAnchor="middle" fill={color} fontSize="12" fontWeight="bold">{p.val}</text>
+                        <text x={p.x} y={178} textAnchor="middle" fill="#64748b" fontSize="11">{p.date}</text>
+                      </g>
+                    ))}
+                  </>
+                );
+              })()}
+            </svg>
+          </div>
+          {/* 图例 */}
+          <div className="flex justify-center gap-4 text-[10px] text-slate-500">
+            {[
+              { key: "cmj" as const, label: "CMJ", color: "#f59e0b" },
+              { key: "sj" as const, label: "SJ", color: "#3b82f6" },
+              { key: "approach" as const, label: "助跑摸高", color: "#10b981" },
+              { key: "broadJump" as const, label: "立定跳远", color: "#8b5cf6" },
+            ].map(m => {
+              const count = records.filter(r => Number(r[m.key]) > 0).length;
+              return <span key={m.key} className="flex items-center gap-1">
+                <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: m.color }} /> {m.label} ({count}次)
+              </span>;
             })}
           </div>
         </div>

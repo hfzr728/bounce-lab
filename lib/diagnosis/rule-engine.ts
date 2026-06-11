@@ -9,6 +9,7 @@ import { DIMENSION_WEIGHTS, DIMENSION_DESCRIPTIONS,
 import { getQuestionById, allQuestions } from "@/lib/questionnaire/questions";
 import { getBasicQuestionById, basicQuestions } from "@/lib/questionnaire/basic-questions";
 import { standardQuestions } from "@/lib/questionnaire/standard-questions";
+import { getSportProfile, getSportInjuryRisk, SPORT_PROFILES } from "./sport-profiles";
 
 /** 根据阈值范围查找分数 */
 function scoreByRange(value: number, norms: { min: number; max: number; score: number }[]): number {
@@ -279,6 +280,14 @@ export function assessInjuryRisk(answers: AnswersMap): { level: "低" | "中" | 
   const isBasic = isBasicAnswers(answers);
   const isStandard = isStandardAnswers(answers);
 
+  // ===== 运动专项伤病风险 =====
+  const sportId = (answers["sport"] || answers["bb_sport"] || answers["st_sport"] || "general_fitness") as string;
+  const sportRisk = getSportInjuryRisk(sportId, []);
+  if (sportRisk.riskScore > 0) {
+    risk += sportRisk.riskScore;
+    factors.push(...sportRisk.factors);
+  }
+
   // 基础版受伤风险评估（综合伤病+力量+恢复）
   if (isBasic) {
     const inj = answers["bb23"];
@@ -372,16 +381,61 @@ export function assessInjuryRisk(answers: AnswersMap): { level: "低" | "中" | 
   return { level, score: risk, factors };
 }
 
+// 将英文问卷值翻译为中文，避免 AI 输出英文
+const VALUE_CN: Record<string, string> = {
+  "male": "男", "female": "女",
+  "excellent": "优秀", "good": "良好", "average": "一般", "poor": "差",
+  "concern": "需关注", "unknown": "未知",
+  "small": "偏细", "medium": "中等", "large": "偏粗",
+  "long_legs": "长腿型", "balanced": "均衡型", "long_torso": "长躯干型",
+  "long": "长", "short": "短",
+  "normal": "正常", "high": "偏高", "flat": "偏平",
+  "none": "无/没有", "leg_align": "腿型排列问题",
+  "low": "低", "moderate": "中等", "severe": "严重",
+  "elite": "精英级", "advanced": "高级", "intermediate": "中级", "novice": "新手",
+  "strong": "强壮", "slight": "轻微",
+  "explosive": "爆发力型", "slow_str": "慢速力量型",
+  "stable": "稳定", "big": "大幅度",
+  "velo_dom": "速度主导", "force_dom": "力量主导",
+  "force_deficit": "力量不足", "velocity_deficit": "速度不足",
+  "strength_heavy": "偏力量", "plyo_heavy": "偏增强式",
+  "tight": "紧张",
+  "passed": "通过", "asymmetry": "不对称",
+  "frequent": "频繁", "occasional": "偶尔", "rare": "很少",
+  "systematic": "系统训练", "casual": "随意/休闲", "some": "有一定训练",
+  "structured": "有结构", "regular": "定期", "irregular": "不定期",
+  "ramp": "有热身", "brief": "简短",
+  "basic": "基础", "sometimes": "偶尔",
+  "pro": "专业", "detailed": "详细记录",
+  "gym": "健身房", "home": "家中", "outdoor": "户外",
+  "max_jump": "最大化弹跳高度", "dunk": "扣篮", "sport_perf": "运动表现提升", "general_fitness": "综合体能",
+  "beginner": "新手入门",
+  "1d": "1天", "2-3d": "2-3天", "3-5d": "3-5天",
+  "30-60": "30-60分钟", "60-90": "60-90分钟", "90+": "90分钟以上",
+  "<50": "低于50", "50-60": "50-60", "60-70": "60-70", ">70": "高于70",
+  "0.5-1": "0.5-1年", "1-3": "1-3年", "3-5": "3-5年", "5+": "5年以上", "<0.5": "不足半年",
+};
+
+function translateVal(v: unknown): string {
+  if (typeof v === "string" && VALUE_CN[v]) return VALUE_CN[v];
+  return String(v ?? "");
+}
+
 export function generatePlanInput(answers: AnswersMap): string {
   const isBasic = isBasicAnswers(answers);
+  const sportId = (answers["sport"] || answers["bb_sport"] || answers["st_sport"] || "general_fitness") as string;
+  const sport = getSportProfile(sportId);
+  const sportContext = sport
+    ? `\n运动专项：${sport.name}（分类：${sport.category === "jump" ? "跳跃类" : sport.category === "sprint" ? "冲刺类" : "力量类"}，RFD需求：${sport.rfdDemand === "fast" ? "极快<150ms" : sport.rfdDemand === "moderate" ? "中等150-250ms" : "较慢>250ms"}，起跳方式：${sport.jumpType === "single_leg" ? "单腿为主" : sport.jumpType === "double_leg" ? "双腿为主" : "混合"}）\n专项特点：${sport.characteristics}\n训练重点：${sport.trainingPriorities.join("、")}\n专项警告：${sport.warnings.join("；")}`
+    : "";
   if (isBasic) {
-    const d = answers["bb29"] || "3"; const m = answers["bb30"] || "60-90";
-    const f = answers["bb31"] || "gym"; const g = answers["bb33"] || "max_jump";
-    const w = 12; const exp = answers["bb21"] || "occasional";
-    return `训练者画像（基础版）：训练习惯=${exp}，每周${d}天，每次${m}分钟，场地=${f}，目标=${g}，期望周期=${w}周`;
+    const d = answers["bb29"] || "3"; const m = translateVal(answers["bb30"] || "60-90");
+    const f = translateVal(answers["bb31"] || "gym"); const g = translateVal(answers["bb33"] || "max_jump");
+    const w = 12; const exp = translateVal(answers["bb21"] || "occasional");
+    return `训练者画像（基础版）：训练习惯=${exp}，每周${d}天，每次${m}，场地=${f}，目标=${g}，期望周期=${w}周${sportContext}`;
   }
-  const d = answers["a01"] || "3"; const m = answers["a02"] || "60-90";
-  const f = answers["a03"] || "gym"; const g = answers["a05"] || "max_jump";
-  const w = answers["a06"] || 12; const exp = answers["ex01"] || "beginner";
-  return `训练者画像：训练经验=${exp}，每周${d}天，每次${m}分钟，场地=${f}，目标=${g}，期望周期=${w}周`;
+  const d = answers["a01"] || "3"; const m = translateVal(answers["a02"] || "60-90");
+  const f = translateVal(answers["a03"] || "gym"); const g = translateVal(answers["a05"] || "max_jump");
+  const w = answers["a06"] || 12; const exp = translateVal(answers["ex01"] || "beginner");
+  return `训练者画像：训练经验=${exp}，每周${d}天，每次${m}，场地=${f}，目标=${g}，期望周期=${w}周${sportContext}`;
 }

@@ -20,7 +20,7 @@ export default function ExercisesPage() {
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-extrabold text-slate-50 mb-2">🏋️ 训练动作库</h1>
-        <p className="text-slate-400">弹跳训练全部动作详解——按部位分类，含专业教练提示</p>
+        <p className="text-slate-400">弹跳训练全部动作详解——按训练方式分类，含专业教练提示</p>
       </div>
 
       {/* 搜索 */}
@@ -59,7 +59,7 @@ export default function ExercisesPage() {
                   <h3 className="font-bold text-slate-100">{ex.name}</h3>
                   <span className={`text-xs px-2 py-0.5 rounded-full border ${diffColors[ex.difficulty]}`}>{ex.difficulty}</span>
                 </div>
-                <p className="text-xs text-slate-500">{ex.nameEn} · {ex.targetMuscles}</p>
+                <p className="text-xs text-slate-500">{ex.description.split("。")[0]}</p>
               </div>
               <svg className={`w-5 h-5 text-slate-500 flex-shrink-0 transition-transform mt-2 ${expandedId === ex.id ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </button>

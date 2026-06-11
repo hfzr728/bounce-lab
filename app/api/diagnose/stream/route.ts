@@ -8,6 +8,7 @@ import { DIAGNOSIS_SYSTEM_PROMPT, buildDiagnosisUserPrompt } from "@/lib/ai/prom
 import { allQuestions } from "@/lib/questionnaire/questions";
 import { basicQuestions } from "@/lib/questionnaire/basic-questions";
 import { standardQuestions } from "@/lib/questionnaire/standard-questions";
+import { searchKnowledgeBase } from "@/lib/knowledge-base";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -66,8 +67,16 @@ export async function POST(request: NextRequest) {
           `风险等级：${injuryRisk.level}（${injuryRisk.score}/100），风险因素：${injuryRisk.factors.join("、") || "无显著风险因素"}`
         );
 
+        // 3.5 RAG 检索：根据弱点和伤病搜索知识库
+        const kbQuery = [...weaknesses, ...injuryRisk.factors].join(" ");
+        const relevantArticles = searchKnowledgeBase(kbQuery, 3);
+        const kbContext = relevantArticles.length > 0
+          ? "\n\n## 参考知识库（基于运动科学文献）\n" + relevantArticles.map(a => `【${a.title}】\n${a.content.slice(0, 600)}`).join("\n\n---\n\n")
+          : "";
+        const systemPromptWithKB = DIAGNOSIS_SYSTEM_PROMPT + kbContext;
+
         // 4. 流式推送 AI 分析
-        for await (const chunk of callDeepSeekStream(DIAGNOSIS_SYSTEM_PROMPT, userPrompt)) {
+        for await (const chunk of callDeepSeekStream(systemPromptWithKB, userPrompt)) {
           send("ai", { text: chunk });
         }
 

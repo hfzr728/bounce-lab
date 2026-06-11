@@ -38,12 +38,21 @@ export async function POST(request: NextRequest) {
       .join("\n");
 
     // 4. 构建用户关键数据摘要（自动识别体测版/国际标准版/专业版）
+    // 将选项的 value 翻译为中文 label，避免 AI 输出英文
     const isBasic = Object.keys(answers).some(k => k.startsWith("bb"));
     const isStandard = Object.keys(answers).some(k => k.startsWith("st"));
     const questionSet = isBasic ? basicQuestions : isStandard ? standardQuestions : allQuestions;
     const keyAnswers = questionSet
       .filter((q) => answers[q.id] !== undefined && answers[q.id] !== "")
-      .map((q) => `- ${q.text}：${answers[q.id]}${q.unit || ""}`)
+      .map((q) => {
+        let displayVal = answers[q.id];
+        // Translate select options from value to Chinese label
+        if (q.type === "select" && q.options) {
+          const opt = q.options.find(o => o.value === String(answers[q.id]));
+          if (opt) displayVal = opt.label;
+        }
+        return `- ${q.text}：${displayVal}${q.unit || ""}`;
+      })
       .join("\n");
 
     // 5. 构建完整 user prompt
@@ -68,6 +77,8 @@ export async function POST(request: NextRequest) {
       weaknesses,
       injuryRisk,
       aiAnalysis,
+      answers,
+      version: isBasic ? "basic" : isStandard ? "standard" : "advanced",
     };
 
     return NextResponse.json(result);

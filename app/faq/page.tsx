@@ -129,6 +129,17 @@ export default function FAQPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* 推广 AI 问答 */}
+      <div className="bg-gradient-to-r from-amber-500/10 to-violet-500/10 border border-amber-500/20 rounded-2xl p-4 mb-6 flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <p className="text-amber-300 font-bold text-sm">🤖 全新 AI 问答已上线</p>
+          <p className="text-slate-400 text-xs">自由提问，AI 基于运动科学知识库实时回答</p>
+        </div>
+        <a href="/qa" className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-xl text-sm transition-all shrink-0">
+          进入 AI 问答 →
+        </a>
+      </div>
+
       <div className="text-center mb-8">
         <h1 className="text-3xl font-extrabold text-slate-50 mb-2">🔍 疑难杂症</h1>
         <p className="text-slate-400">

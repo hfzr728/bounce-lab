@@ -16,17 +16,9 @@ interface SavedRecord {
 export default function ProfilePage() {
   const { user, isLoggedIn } = useUser();
   const [records, setRecords] = useState<SavedRecord[]>([]);
-  const [hasUnsaved, setHasUnsaved] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    // 检查未保存数据
-    try {
-      const diag = sessionStorage.getItem("bounce-diagnosis");
-      const plan = sessionStorage.getItem("bounce-plan");
-      setHasUnsaved(!!(diag || plan));
-    } catch { /* SSR safe */ }
-
     // 加载已保存记录
     const savedRecords: SavedRecord[] = [];
     for (let i = 0; i < localStorage.length; i++) {
@@ -42,58 +34,23 @@ export default function ProfilePage() {
     setRecords(savedRecords);
   }, [saved]);
 
-  const handleSaveCurrent = () => {
-    const diag = sessionStorage.getItem("bounce-diagnosis");
-    const plan = sessionStorage.getItem("bounce-plan");
-    const answers = sessionStorage.getItem("bounce-answers");
-    const now = new Date().toLocaleString("zh-CN");
+  const clearAll = () => { if (confirm("确定清除所有记录？")) { const keys: string[] = []; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key?.startsWith("bounce-saved-")) keys.push(key); } keys.forEach(k => localStorage.removeItem(k)); setRecords([]); } };
 
-    if (diag) {
-      try {
-        const d = JSON.parse(diag);
-        const isBasic = answers ? Object.keys(JSON.parse(answers)).some((k: string) => k.startsWith("bb")) : false;
-        const isStandard = answers ? Object.keys(JSON.parse(answers)).some((k: string) => k.startsWith("st")) : false;
-        const version = isBasic ? "体测版" : isStandard ? "国际标准版" : "专业版";
-        const record: SavedRecord = {
-          type: "diagnosis",
-          date: now,
-          version,
-          overallScore: d.overallScore,
-          summary: `综合评分 ${d.overallScore}/100，优势：${d.strengths?.join("、") || "无"}`,
-        };
-        localStorage.setItem(`bounce-saved-d-${Date.now()}`, JSON.stringify(record));
-      } catch { /* ignore */ }
-    }
-
-    if (plan) {
-      try {
-        const p = JSON.parse(plan);
-        const record: SavedRecord = {
-          type: "plan",
-          date: now,
-          version: "",
-          summary: (p.aiGenerated || "").slice(0, 100) + "..." || "训练计划已保存",
-          planText: p.aiGenerated || "",
-        };
-        localStorage.setItem(`bounce-saved-p-${Date.now()}`, JSON.stringify(record));
-      } catch { /* ignore */ }
-    }
-
-    // 清除 sessionStorage 标记为已保存
-    sessionStorage.removeItem("bounce-diagnosis");
-    sessionStorage.removeItem("bounce-plan");
-    setHasUnsaved(false);
-    setSaved(prev => !prev); // 触发刷新
-  };
-
-  const clearAll = () => {
-    const keys: string[] = [];
+  const deleteOne = (r: any) => {
+    if (!confirm("确定删除这条记录？")) return;
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key?.startsWith("bounce-saved-")) keys.push(key);
+      if (key?.startsWith("bounce-saved-")) {
+        try {
+          const d = JSON.parse(localStorage.getItem(key) || "");
+          if (d.date === r.date && d.type === r.type && d.summary === r.summary) {
+            localStorage.removeItem(key);
+            break;
+          }
+        } catch {}
+      }
     }
-    keys.forEach(k => localStorage.removeItem(k));
-    setRecords([]);
+    setSaved(prev => !prev);
   };
 
   const openRecord = (r: any) => {
@@ -148,23 +105,11 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {hasUnsaved && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6 mb-8 text-center">
-          <p className="text-amber-300 mb-3">检测到当前有未保存的评估/计划结果</p>
-          <button
-            onClick={handleSaveCurrent}
-            className="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-xl transition-all shadow-lg shadow-amber-500/25"
-          >
-            💾 保存到个人记录
-          </button>
-        </div>
-      )}
-
       {records.length === 0 && (
         <div className="text-center py-20">
           <div className="text-6xl mb-6">📭</div>
           <h2 className="text-xl font-bold text-slate-200 mb-4">暂无保存记录</h2>
-          <p className="text-slate-400 mb-8">完成评估后，在报告页点击"保存到个人记录"即可</p>
+          <p className="text-slate-400 mb-8">完成评估后，报告和训练计划将自动保存到这里</p>
           <Link
             href="/assessment"
             className="inline-block px-8 py-4 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-xl transition-all shadow-lg shadow-amber-500/25"
@@ -179,8 +124,13 @@ export default function ProfilePage() {
           <div
             key={i}
             onClick={() => openRecord(r)}
-            className="bg-[#1e293b] border border-slate-700/50 rounded-xl p-5 hover:border-amber-500/50 hover:bg-[#1e293b]/80 transition-all cursor-pointer"
+            className="bg-[#1e293b] border border-slate-700/50 rounded-xl p-5 hover:border-amber-500/50 hover:bg-[#1e293b]/80 transition-all cursor-pointer relative group"
           >
+            <button
+              onClick={(e) => { e.stopPropagation(); deleteOne(r); }}
+              className="absolute top-3 right-3 w-6 h-6 rounded-full bg-slate-700 hover:bg-red-600 text-slate-400 hover:text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+              title="删除"
+            >✕</button>
             <div className="flex items-center justify-between mb-2">
               <span className={`text-xs font-bold px-2 py-1 rounded ${r.type === "diagnosis" ? "bg-amber-500/20 text-amber-400" : "bg-green-500/20 text-green-400"}`}>
                 {r.type === "diagnosis" ? "📊 评估报告" : "📋 训练计划"}
@@ -198,7 +148,15 @@ export default function ProfilePage() {
       </div>
 
       {records.length > 0 && (
-        <div className="text-center mt-10">
+        <div className="text-center mt-10 space-y-4">
+          <div className="flex justify-center gap-4">
+            <Link href="/plan" className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-[#0a0a14] font-bold rounded-xl transition-all shadow-lg">
+              🧠 去生成训练计划 →
+            </Link>
+            <Link href="/assessment" className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold rounded-xl transition-all border border-slate-600">
+              🔬 去评估
+            </Link>
+          </div>
           <button
             onClick={clearAll}
             className="px-4 py-2 text-sm text-slate-500 hover:text-red-400 transition-colors"
