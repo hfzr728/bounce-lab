@@ -23,7 +23,7 @@ async function callAI(systemPrompt, userPrompt) {
     const resp = await client.chat.completions.create({
       model: "deepseek-chat",
       temperature: 0.7,
-      max_tokens: 4096,
+      max_tokens: 8192,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
