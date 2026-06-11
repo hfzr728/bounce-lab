@@ -508,7 +508,7 @@ function PlanExerciseRow({ pe, index, total, dispatch }: { pe: PlanExercise; ind
       <div className="flex flex-wrap gap-2 ml-10">
         <div className="flex items-center gap-1">
           <label className="text-xs text-slate-500">组</label>
-          <input type="number" min={1} max={10} value={pe.sets} onChange={e => dispatch({ type: "UPDATE_EXERCISE", uid: pe.uid, field: "sets", value: parseInt(e.target.value) || 1 })}
+          <input type="number" min={1} max={10} value={pe.sets} onChange={e => { const v = parseInt(e.target.value); dispatch({ type: "UPDATE_EXERCISE", uid: pe.uid, field: "sets", value: isNaN(v) ? 1 : v }); }}
             className="w-12 text-center text-xs bg-slate-700 border border-slate-600 rounded px-1 py-0.5 text-slate-200 outline-none focus:border-amber-500/50" />
         </div>
         <div className="flex items-center gap-1">
@@ -518,7 +518,7 @@ function PlanExerciseRow({ pe, index, total, dispatch }: { pe: PlanExercise; ind
         </div>
         <div className="flex items-center gap-1">
           <label className="text-xs text-slate-500">休息(s)</label>
-          <input type="number" min={0} max={600} step={15} value={pe.restSec} onChange={e => dispatch({ type: "UPDATE_EXERCISE", uid: pe.uid, field: "restSec", value: parseInt(e.target.value) || 0 })}
+          <input type="number" min={0} max={600} step={15} value={pe.restSec} onChange={e => { const v = parseInt(e.target.value); dispatch({ type: "UPDATE_EXERCISE", uid: pe.uid, field: "restSec", value: isNaN(v) ? 0 : v }); }}
             className="w-14 text-center text-xs bg-slate-700 border border-slate-600 rounded px-1 py-0.5 text-slate-200 outline-none focus:border-amber-500/50" />
         </div>
         <input type="text" value={pe.note} onChange={e => dispatch({ type: "UPDATE_EXERCISE", uid: pe.uid, field: "note", value: e.target.value })}

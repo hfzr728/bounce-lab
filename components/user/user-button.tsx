@@ -100,17 +100,17 @@ export function UserButton() {
               {/* Stats row */}
               <div className="grid grid-cols-3 gap-2 mb-2.5">
                 <div>
-                  <input type="number" value={form.weight || 70} onChange={e => setForm(f => ({ ...f, weight: parseInt(e.target.value) || 70 }))}
+                  <input type="number" value={form.weight || ""} onChange={e => { const v = parseInt(e.target.value); setForm(f => ({ ...f, weight: isNaN(v) ? 0 : v })); }}
                     placeholder="体重" className="w-full px-2 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-xs text-slate-200 text-center outline-none focus:border-amber-500/50" />
                   <p className="text-[10px] text-slate-600 text-center mt-0.5">kg</p>
                 </div>
                 <div>
-                  <input type="number" value={form.height || 175} onChange={e => setForm(f => ({ ...f, height: parseInt(e.target.value) || 175 }))}
+                  <input type="number" value={form.height || ""} onChange={e => { const v = parseInt(e.target.value); setForm(f => ({ ...f, height: isNaN(v) ? 0 : v })); }}
                     placeholder="身高" className="w-full px-2 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-xs text-slate-200 text-center outline-none focus:border-amber-500/50" />
                   <p className="text-[10px] text-slate-600 text-center mt-0.5">cm</p>
                 </div>
                 <div>
-                  <input type="number" value={form.age || 22} onChange={e => setForm(f => ({ ...f, age: parseInt(e.target.value) || 20 }))}
+                  <input type="number" value={form.age || ""} onChange={e => { const v = parseInt(e.target.value); setForm(f => ({ ...f, age: isNaN(v) ? 0 : v })); }}
                     placeholder="年龄" className="w-full px-2 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-xs text-slate-200 text-center outline-none focus:border-amber-500/50" />
                   <p className="text-[10px] text-slate-600 text-center mt-0.5">岁</p>
                 </div>
