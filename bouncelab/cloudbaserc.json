@@ -1,0 +1,8 @@
+{
+  "version": "2.0",
+  "envId": "bouncelab-d5glxli5o912776b1",
+  "$schema": "https://framework-1258016615.tcloudbaseapp.com/schema/latest.json",
+  "cloudrun": {
+    "name": "bouncelab"
+  }
+}

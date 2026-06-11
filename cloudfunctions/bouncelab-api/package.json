@@ -1,0 +1,9 @@
+{
+  "name": "bouncelab-api",
+  "version": "1.0.0",
+  "description": "BounceLab API Gateway - CloudBase SCF",
+  "main": "index.js",
+  "dependencies": {
+    "openai": "^6.42.0"
+  }
+}

@@ -35,7 +35,7 @@ function BasicStepContent() {
   const handleSubmit = async () => {
     dispatch({ type: "SET_SUBMITTING", value: true });
     try {
-      const response = await fetch("/api/diagnose/stream", {
+      const response = await fetch("https://bouncelab-d5glxli5o912776b1.service.tcloudbase.com/api/diagnose", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ answers: state.answers }),
