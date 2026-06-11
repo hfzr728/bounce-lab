@@ -52,47 +52,16 @@ function StepContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ answers: state.answers }),
       });
-      if (!response.ok) throw new Error("诊断请求失败");
-
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("无法读取流");
-
-      const decoder = new TextDecoder();
-      let engineResult: any = null;
-      let aiText = "";
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          try {
-            const data = JSON.parse(line.slice(6));
-            if (data.dimensionScores) {
-              engineResult = data;
-              sessionStorage.setItem("bounce-diagnosis", JSON.stringify({ ...data, aiAnalysis: "" }));
-              sessionStorage.setItem("bounce-answers", JSON.stringify(state.answers));
-            } else if (data.text) {
-              aiText += data.text;
-            }
-          } catch {}
-        }
-      }
-
-      if (engineResult) {
-        engineResult.aiAnalysis = aiText;
-        sessionStorage.setItem("bounce-diagnosis", JSON.stringify(engineResult));
-        // 自动保存到个人主页
-        const now = new Date().toLocaleString("zh-CN");
-        const summary = `综合评分 ${engineResult.overallScore}/100，优势：${(engineResult.strengths || []).join("、")}`;
-        const dup = (() => { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith("bounce-saved-d-")) { try { if (JSON.parse(localStorage.getItem(k) || "").summary === summary) return true; } catch {} } } return false; })();
-        if (!dup) localStorage.setItem(`bounce-saved-d-${Date.now()}`, JSON.stringify({ type: "diagnosis", date: now, version: "国际标准版", overallScore: engineResult.overallScore, summary, fullDiagnosis: engineResult }));
-      }
+      if (!response.ok) throw new Error("诊断请求失败: " + response.status);
+      const engineResult = await response.json();
+      engineResult.aiAnalysis = engineResult.aiAnalysis || "";
+      sessionStorage.setItem("bounce-diagnosis", JSON.stringify(engineResult));
+      sessionStorage.setItem("bounce-answers", JSON.stringify(state.answers));
+      // 自动保存到个人主页
+      const now = new Date().toLocaleString("zh-CN");
+      const summary = `综合评分 ${engineResult.overallScore}/100，优势：${(engineResult.strengths || []).join("、")}`;
+      const dup = (() => { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith("bounce-saved-d-")) { try { if (JSON.parse(localStorage.getItem(k) || "").summary === summary) return true; } catch {} } } return false; })();
+      if (!dup) localStorage.setItem(`bounce-saved-d-${Date.now()}`, JSON.stringify({ type: "diagnosis", date: now, version: "国际标准版", overallScore: engineResult.overallScore, summary, fullDiagnosis: engineResult }));
       // 评估完成，清除所有版本的问卷进度
       localStorage.removeItem("bounce-questionnaire-basic");
       localStorage.removeItem("bounce-questionnaire-standard");
