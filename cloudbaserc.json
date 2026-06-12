@@ -9,7 +9,7 @@
       "runtime": "Nodejs20.19",
       "handler": "index.main",
       "envVariables": {
-        "DEEPSEEK_API_KEY": "sk-33702c2b309c4995bac973e825c43f18"
+        "DEEPSEEK_API_KEY": "{{DEEPSEEK_API_KEY}}"
       }
     }
   ]

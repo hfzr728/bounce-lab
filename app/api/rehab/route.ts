@@ -4,7 +4,7 @@
 import { NextRequest } from "next/server";
 import { searchKnowledgeBase } from "@/lib/knowledge-base";
 
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || "sk-33702c2b309c4995bac973e825c43f18";
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || "";
 const DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1";
 
 const INJURY_INFO: Record<string, { name: string; keywords: string }> = {

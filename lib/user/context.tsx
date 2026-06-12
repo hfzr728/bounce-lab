@@ -1,9 +1,12 @@
 "use client";
 // 用户系统 — localStorage 持久化，无需后端
+// 密码使用 SHA-256 + 随机盐哈希存储，不存明文
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import { hashPassword, verifyPassword } from "@/lib/crypto";
 
 export interface UserProfile {
   name: string;
+  /** 当前会话中的明文密码（仅内存，不持久化到 localStorage） */
   password: string;
   avatar: string;
   level: "beginner" | "intermediate" | "advanced";
@@ -14,14 +17,26 @@ export interface UserProfile {
   joinedAt: string;
 }
 
+/** 存储在 USERS_KEY 中的用户记录（密码为哈希值） */
+interface StoredUser {
+  passwordHash: string;
+  avatar: string;
+  level: string;
+  joinedAt: string;
+}
+
 interface UserContextType {
   user: UserProfile | null;
   isLoggedIn: boolean;
-  login: (profile: Partial<UserProfile>) => void;
+  /** 注册/登录（内部自动哈希密码） */
+  login: (profile: Partial<UserProfile>) => Promise<void>;
   logout: () => void;
   updateProfile: (updates: Partial<UserProfile>) => void;
   getUserDataKey: () => string;
-  findUser: (name: string) => { password: string; avatar: string } | null;
+  /** 查找用户是否存在（不返回密码） */
+  findUser: (name: string) => { avatar: string } | null;
+  /** 验证用户密码是否正确 */
+  verifyUser: (name: string, password: string) => Promise<boolean>;
 }
 
 const STORAGE_KEY = "bouncelab_user";
@@ -48,11 +63,12 @@ const LEVEL_LABELS: Record<string, string> = {
 const UserContext = createContext<UserContextType>({
   user: null,
   isLoggedIn: false,
-  login: () => {},
+  login: async () => {},
   logout: () => {},
   updateProfile: () => {},
   getUserDataKey: () => "",
   findUser: () => null,
+  verifyUser: async () => false,
 });
 
 export function UserProvider({ children }: { children: ReactNode }) {
@@ -81,22 +97,30 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, [user, mounted]);
 
-  const login = useCallback((profile: Partial<UserProfile>) => {
+  const login = useCallback(async (profile: Partial<UserProfile>) => {
+    const plainPassword = profile.password || "";
+    const passwordHash = plainPassword ? await hashPassword(plainPassword) : "";
+
     const newUser: UserProfile = {
       ...DEFAULT_USER,
       ...profile,
       joinedAt: new Date().toISOString(),
     };
-    // 保存到用户列表
+    // 保存到用户列表（密码以哈希存储）
     try {
-      const users = JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
-      users[newUser.name] = { password: newUser.password, avatar: newUser.avatar, level: newUser.level, joinedAt: newUser.joinedAt };
+      const users: Record<string, StoredUser> = JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
+      users[newUser.name] = {
+        passwordHash,
+        avatar: newUser.avatar,
+        level: newUser.level,
+        joinedAt: newUser.joinedAt,
+      };
       localStorage.setItem(USERS_KEY, JSON.stringify(users));
     } catch {}
-    // 移除密码后才存 session
-    const { password: _, ...sessionUser } = newUser;
+    // 会话中保留明文密码（仅内存），不写 localStorage
     setUser(newUser);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessionUser));
+    const { password: _, ...sessionUser } = newUser;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...sessionUser, _pwHash: passwordHash }));
   }, []);
 
   const logout = useCallback(() => {
@@ -109,18 +133,35 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const getUserDataKey = useCallback(() => {
     if (!user) return "";
-    return `bouncelab_${user.name}_${user.password}_`;
+    // 使用用户名 + 密码哈希后 8 位作为稳定标识
+    try {
+      const session = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      const hash = session._pwHash || "";
+      return `bouncelab_${user.name}_${hash.slice(-8)}_`;
+    } catch {
+      return `bouncelab_${user.name}_`;
+    }
   }, [user]);
 
   const findUser = useCallback((name: string) => {
     try {
-      const users = JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
-      return users[name] || null;
+      const users: Record<string, StoredUser> = JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
+      const u = users[name];
+      return u ? { avatar: u.avatar } : null;
     } catch { return null; }
   }, []);
 
+  const verifyUser = useCallback(async (name: string, password: string): Promise<boolean> => {
+    try {
+      const users: Record<string, StoredUser> = JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
+      const u = users[name];
+      if (!u || !u.passwordHash) return false;
+      return await verifyPassword(password, u.passwordHash);
+    } catch { return false; }
+  }, []);
+
   return (
-    <UserContext.Provider value={{ user, isLoggedIn: !!user, login, logout, updateProfile, getUserDataKey, findUser }}>
+    <UserContext.Provider value={{ user, isLoggedIn: !!user, login, logout, updateProfile, getUserDataKey, findUser, verifyUser }}>
       {children}
     </UserContext.Provider>
   );

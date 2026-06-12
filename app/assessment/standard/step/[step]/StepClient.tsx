@@ -1,5 +1,4 @@
 "use client";
-"use client";
 
 // 国际标准版问卷步骤页 — /assessment/standard/step/[step]
 

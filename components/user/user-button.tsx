@@ -2,50 +2,39 @@
 // 用户按钮 — 显示在导航栏右侧
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { useUser, LEVEL_LABELS, type UserProfile } from "@/lib/user/context";
+import { useUser } from "@/lib/user/context";
 
 export function UserButton() {
-  const { user, isLoggedIn, login, logout, findUser } = useUser();
+  const { user, isLoggedIn, login, logout, findUser, verifyUser } = useUser();
   const [showModal, setShowModal] = useState(false);
   const [mode, setMode] = useState<"register" | "login">("register");
   const [error, setError] = useState("");
-  const [form, setForm] = useState<Partial<UserProfile>>({
-    name: "",
-    password: "",
-    avatar: "🏀",
-    level: "intermediate",
-    weight: 70,
-    height: 175,
-    age: 22,
-    goal: "提升垂直弹跳",
-  });
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [avatar, setAvatar] = useState("🏀");
 
   const AVATARS = ["🏀", "⚡", "🔥", "💪", "🦘", "🏃", "🎯", "🏆"];
 
-  const handleRegister = () => {
-    if (!form.name?.trim() || !form.password?.trim()) return;
-    // 检查用户是否已存在
-    const existing = findUser(form.name.trim());
+  const handleRegister = async () => {
+    const trimmedName = name.trim();
+    const trimmedPwd = password.trim();
+    if (!trimmedName || !trimmedPwd) return;
+    const existing = findUser(trimmedName);
     if (existing) { setError("该昵称已注册，请切换到登录"); return; }
-    login({ ...form, name: form.name.trim(), password: form.password.trim() });
+    await login({ name: trimmedName, password: trimmedPwd, avatar });
     setShowModal(false);
     setError("");
   };
 
-  const handleLogin = () => {
-    if (!form.name?.trim() || !form.password?.trim()) return;
-    const existing = findUser(form.name.trim());
+  const handleLogin = async () => {
+    const trimmedName = name.trim();
+    const trimmedPwd = password.trim();
+    if (!trimmedName || !trimmedPwd) return;
+    const existing = findUser(trimmedName);
     if (!existing) { setError("该用户不存在，请先注册"); return; }
-    if (existing.password !== form.password.trim()) { setError("密码错误"); return; }
-    // 登录成功，加载用户数据
-    login({
-      name: form.name.trim(),
-      password: form.password.trim(),
-      avatar: existing.avatar,
-      level: "intermediate",
-      weight: 70, height: 175, age: 22,
-      goal: "提升垂直弹跳",
-    });
+    const valid = await verifyUser(trimmedName, trimmedPwd);
+    if (!valid) { setError("密码错误"); return; }
+    await login({ name: trimmedName, password: trimmedPwd, avatar: existing.avatar });
     setShowModal(false);
     setError("");
   };
@@ -76,53 +65,29 @@ export function UserButton() {
               {error && <p className="text-xs text-red-400 mb-3 bg-red-500/10 px-3 py-2 rounded-lg">{error}</p>}
 
               <div className="mb-2.5">
-                <input type="text" value={form.name || ""} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                <input type="text" value={name} onChange={e => setName(e.target.value)}
                   placeholder="昵称" className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-amber-500/50" />
               </div>
-              <div className="mb-2.5">
-                <input type="password" value={form.password || ""} onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+              <div className="mb-3">
+                <input type="password" value={password} onChange={e => setPassword(e.target.value)}
                   placeholder={mode === "register" ? "设置密码" : "输入密码"}
                   className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-amber-500/50" />
               </div>
 
-              {/* Level */}
-              <div className="mb-2.5">
-                <div className="flex gap-1.5">
-                  {(Object.entries(LEVEL_LABELS) as [string, string][]).map(([key, label]) => (
-                    <button key={key} onClick={() => setForm(f => ({ ...f, level: key as UserProfile["level"] }))}
-                      className={`flex-1 py-1.5 text-xs rounded-lg transition-all ${
-                        form.level === key ? "bg-amber-500/20 text-amber-300 border border-amber-500/50" : "bg-slate-800 text-slate-400 border border-slate-700 hover:border-slate-500"
-                      }`}>{label}</button>
-                  ))}
+              {/* 头像选择（仅注册时显示） */}
+              {mode === "register" && (
+                <div className="mb-4">
+                  <p className="text-xs text-slate-500 mb-2">选择头像</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {AVATARS.map(a => (
+                      <button key={a} onClick={() => setAvatar(a)}
+                        className={`w-9 h-9 text-lg rounded-lg transition-all ${avatar === a ? "bg-amber-500/20 border border-amber-500/50 scale-110" : "bg-slate-800 border border-slate-700 hover:border-slate-500"}`}>{a}</button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Stats row */}
-              <div className="grid grid-cols-3 gap-2 mb-2.5">
-                <div>
-                  <input type="number" value={form.weight || ""} onChange={e => { const v = parseInt(e.target.value); setForm(f => ({ ...f, weight: isNaN(v) ? 0 : v })); }}
-                    placeholder="体重" className="w-full px-2 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-xs text-slate-200 text-center outline-none focus:border-amber-500/50" />
-                  <p className="text-[10px] text-slate-600 text-center mt-0.5">kg</p>
-                </div>
-                <div>
-                  <input type="number" value={form.height || ""} onChange={e => { const v = parseInt(e.target.value); setForm(f => ({ ...f, height: isNaN(v) ? 0 : v })); }}
-                    placeholder="身高" className="w-full px-2 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-xs text-slate-200 text-center outline-none focus:border-amber-500/50" />
-                  <p className="text-[10px] text-slate-600 text-center mt-0.5">cm</p>
-                </div>
-                <div>
-                  <input type="number" value={form.age || ""} onChange={e => { const v = parseInt(e.target.value); setForm(f => ({ ...f, age: isNaN(v) ? 0 : v })); }}
-                    placeholder="年龄" className="w-full px-2 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-xs text-slate-200 text-center outline-none focus:border-amber-500/50" />
-                  <p className="text-[10px] text-slate-600 text-center mt-0.5">岁</p>
-                </div>
-              </div>
-
-              {/* Goal */}
-              <div className="mb-4">
-                <input type="text" value={form.goal || ""} onChange={e => setForm(f => ({ ...f, goal: e.target.value }))}
-                  placeholder="训练目标，如：扣篮" className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-amber-500/50" />
-              </div>
-
-              <button onClick={mode === "register" ? handleRegister : handleLogin} disabled={!form.name?.trim() || !form.password?.trim()}
+              <button onClick={mode === "register" ? handleRegister : handleLogin} disabled={!name.trim() || !password.trim()}
                 className="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold rounded-xl text-sm transition-all hover:from-amber-400 hover:to-amber-500 disabled:opacity-50 disabled:cursor-not-allowed">
                 {mode === "register" ? "注册并开始使用 →" : "登录 →"}
               </button>

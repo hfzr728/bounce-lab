@@ -41,7 +41,8 @@ fi
 # 6. 创建环境变量文件
 echo "📝 创建 .env.local..."
 cat > .env.local << 'EOF'
-DEEPSEEK_API_KEY=sk-33702c2b309c4995bac973e825c43f18
+# 请在部署前替换为真实的 API Key
+DEEPSEEK_API_KEY=your-deepseek-api-key-here
 EOF
 
 # 7. 安装依赖 + 构建

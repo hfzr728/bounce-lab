@@ -1,5 +1,4 @@
 "use client";
-"use client";
 // 基础版问卷步骤页
 
 // 为静态托管预渲染所有 5 个步骤的 HTML
