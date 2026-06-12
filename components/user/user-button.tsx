@@ -2,7 +2,7 @@
 // 用户按钮 — 显示在导航栏右侧
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { useUser } from "@/lib/user/context";
+import { useUser, LEVEL_LABELS } from "@/lib/user/context";
 
 export function UserButton() {
   const { user, isLoggedIn, login, logout, findUser, verifyUser } = useUser();
