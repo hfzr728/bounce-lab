@@ -5,12 +5,15 @@ import Link from "next/link";
 import { useUser } from "@/lib/user/context";
 
 interface SavedRecord {
-  type: "diagnosis" | "plan";
+  type: "diagnosis" | "plan" | "rehab";
   date: string;
-  version: string;
+  version?: string;
   overallScore?: number;
   summary: string;
   planText?: string;
+  rehabPlan?: string;
+  injuries?: string;
+  stage?: string;
 }
 
 export default function ProfilePage() {
@@ -60,8 +63,13 @@ export default function ProfilePage() {
     } else if (r.type === "diagnosis" && r.fullDiagnosis) {
       sessionStorage.setItem("bounce-diagnosis", JSON.stringify(r.fullDiagnosis));
       window.location.href = "/report";
+    } else if (r.type === "rehab" && r.rehabPlan) {
+      sessionStorage.setItem("bounce-rehab", JSON.stringify({ plan: r.rehabPlan, injuries: r.injuries, stage: r.stage }));
+      window.location.href = "/rehab";
     } else if (r.type === "plan") {
       window.location.href = "/plan";
+    } else if (r.type === "rehab") {
+      window.location.href = "/rehab";
     } else {
       window.location.href = "/report";
     }
@@ -132,11 +140,18 @@ export default function ProfilePage() {
               title="删除"
             >✕</button>
             <div className="flex items-center justify-between mb-2">
-              <span className={`text-xs font-bold px-2 py-1 rounded ${r.type === "diagnosis" ? "bg-amber-500/20 text-amber-400" : "bg-green-500/20 text-green-400"}`}>
-                {r.type === "diagnosis" ? "📊 评估报告" : "📋 训练计划"}
+              <span className={`text-xs font-bold px-2 py-1 rounded ${
+                r.type === "diagnosis" ? "bg-amber-500/20 text-amber-400"
+                : r.type === "plan" ? "bg-green-500/20 text-green-400"
+                : "bg-purple-500/20 text-purple-400"
+              }`}>
+                {r.type === "diagnosis" ? "📊 评估报告" : r.type === "plan" ? "📋 训练计划" : "🏥 康复方案"}
               </span>
               <span className="text-xs text-slate-500">{r.date}</span>
             </div>
+            {r.type === "rehab" && r.injuries && (
+              <p className="text-xs text-slate-500 mb-1">伤病：{r.injuries} · 阶段：{r.stage}</p>
+            )}
             {r.version && <p className="text-xs text-slate-500 mb-1">版本：{r.version}</p>}
             {r.overallScore !== undefined && (
               <p className="text-2xl font-bold text-amber-400 mb-1">{r.overallScore}<span className="text-sm text-slate-500">/100</span></p>

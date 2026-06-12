@@ -33,7 +33,20 @@ export default function RehabPage() {
   const [details, setDetails] = useState("");
   const [plan, setPlan] = useState("");
   const [loading, setLoading] = useState(false);
+  const [saved, setSaved] = useState(false);
   const planRef = useRef<HTMLDivElement>(null);
+
+  // 从个人主页跳转过来时，恢复已保存的康复方案
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("bounce-rehab");
+      if (raw) {
+        const data = JSON.parse(raw);
+        if (data.plan) setPlan(data.plan);
+        sessionStorage.removeItem("bounce-rehab");
+      }
+    } catch {}
+  }, []);
 
   if (!isLoggedIn) return (
     <div className="max-w-4xl mx-auto px-4 py-16 text-center bg-[#0f172a] min-h-screen">
@@ -43,6 +56,35 @@ export default function RehabPage() {
       <Link href="/" className="inline-block px-8 py-4 bg-amber-500 hover:bg-amber-400 text-[#0a0a14] font-bold rounded-xl text-lg transition-all shadow-lg">返回首页</Link>
     </div>
   );
+
+  const handleSave = () => {
+    if (!plan || saved) return;
+    const injuryNames = injuries.map(id => INJURIES.find(i => i.id === id)?.name || id).join("、");
+    const stageName = STAGES.find(s => s.id === stage)?.name || stage;
+    const now = new Date().toLocaleString("zh-CN");
+    const summary = plan.replace(/\n/g, " ").slice(0, 120);
+    const dup = (() => {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k?.startsWith("bounce-saved-r-")) {
+          try { if (JSON.parse(localStorage.getItem(k) || "").summary === summary) return true; } catch {}
+        }
+      }
+      return false;
+    })();
+    if (!dup) {
+      localStorage.setItem(`bounce-saved-r-${Date.now()}`, JSON.stringify({
+        type: "rehab",
+        date: now,
+        injuries: injuryNames,
+        stage: stageName,
+        summary,
+        rehabPlan: plan,
+      }));
+    }
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  };
 
   const toggleInjury = (id: string) => {
     setInjuries(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -192,6 +234,17 @@ export default function RehabPage() {
               className="px-4 py-2 bg-slate-700/50 hover:bg-slate-700 text-slate-300 rounded-xl text-sm transition-all"
             >
               重新生成
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saved}
+              className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                saved
+                  ? "bg-green-500/20 text-green-400 border border-green-500/50"
+                  : "bg-amber-500 hover:bg-amber-400 text-slate-900"
+              }`}
+            >
+              {saved ? "✅ 已保存到主页" : "💾 保存到主页"}
             </button>
             <button
               onClick={() => { setInjuries([]); setStage(""); setPlan(""); setDetails(""); }}
