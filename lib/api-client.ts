@@ -1,5 +1,5 @@
 // API 基础 URL — CloudBase SCF 云函数
-const SCF_API_BASE = "https://bouncelab-d5glxli5o912776b1.service.tcloudbase.com/api";
+const SCF_API_BASE = "";
 
 /**
  * 调用 BounceLab API 云函数

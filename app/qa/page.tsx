@@ -82,7 +82,7 @@ export default function QAPage() {
     setMessages(prev => [...prev, { role: "assistant", content: "" }]);
 
     try {
-      const response = await fetch("https://bouncelab-d5glxli5o912776b1.service.tcloudbase.com/api/qa", {
+      const response = await fetch("/api/qa", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: q }),

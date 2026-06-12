@@ -55,7 +55,7 @@ export default function RehabPage() {
     setPlan("");
 
     try {
-      const response = await fetch("https://bouncelab-d5glxli5o912776b1.service.tcloudbase.com/api/rehab", {
+      const response = await fetch("/api/rehab", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ injuries, stage, details }),
