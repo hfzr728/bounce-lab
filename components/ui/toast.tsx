@@ -1,5 +1,5 @@
 "use client";
-// 轻量 Toast 通知组件
+// 轻量 Toast 通知组件 — 玻璃态霓虹风
 import { useState, useEffect, createContext, useContext, useCallback, type ReactNode } from "react";
 
 interface ToastItem { id: number; message: string; type: "success" | "error" | "info"; }
@@ -22,10 +22,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 pointer-events-none">
         {toasts.map(t => (
-          <div key={t.id} className={`pointer-events-auto px-5 py-3 rounded-xl shadow-lg text-sm font-medium animate-fade-in-up ${
-            t.type === "success" ? "bg-green-600 text-white" :
-            t.type === "error" ? "bg-red-600 text-white" :
-            "bg-slate-700 text-slate-100 border border-slate-600"
+          <div key={t.id} className={`pointer-events-auto px-5 py-3 rounded-xl text-sm font-medium animate-fade-in-up backdrop-blur-md border ${
+            t.type === "success" ? "bg-[#00F5FF]/10 border-[#00F5FF]/30 text-[#00F5FF] shadow-[0_0_20px_rgba(0,245,255,0.1)]" :
+            t.type === "error" ? "bg-[#FF3B3B]/10 border-[#FF3B3B]/30 text-[#FF3B3B] shadow-[0_0_20px_rgba(255,59,59,0.1)]" :
+            "bg-white/5 border-white/10 text-slate-200"
           }`}>
             {t.type === "success" ? "✅ " : t.type === "error" ? "❌ " : "ℹ️ "}
             {t.message}

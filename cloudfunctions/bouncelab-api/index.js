@@ -5,7 +5,11 @@
 
 const OpenAI = require("openai");
 
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || "sk-33702c2b309c4995bac973e825c43f18";
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
+
+if (!DEEPSEEK_API_KEY) {
+  throw new Error("DEEPSEEK_API_KEY 环境变量未设置，AI 功能不可用");
+}
 const DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1";
 
 // ---- DeepSeek 客户端 ----

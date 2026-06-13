@@ -2,6 +2,7 @@
 // DeepSeek API 封装 — OpenAI SDK 兼容调用（延迟初始化）
 // ============================================================
 
+import "server-only";
 import OpenAI from "openai";
 
 let _client: OpenAI | null = null;

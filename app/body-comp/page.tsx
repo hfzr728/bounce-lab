@@ -147,25 +147,25 @@ export default function BodyCompPage() {
   };
 
   if (!isLoggedIn) return (
-    <div className="max-w-4xl mx-auto px-4 py-16 text-center bg-[#0f172a] min-h-screen">
+    <div className="max-w-4xl mx-auto px-4 py-16 text-center min-h-screen">
       <div className="text-6xl mb-6">🔒</div>
-      <h1 className="text-3xl font-extrabold text-white mb-4">🍎 饮食与体成分</h1>
-      <p className="text-slate-400 mb-8 max-w-md mx-auto">饮食与体成分功能需要登录后才能使用。点击右上角「👤 登录」按钮创建你的档案。</p>
-      <Link href="/" className="inline-block px-8 py-4 bg-amber-500 hover:bg-amber-400 text-[#0a0a14] font-bold rounded-xl text-lg transition-all shadow-lg">返回首页</Link>
+      <h1 className="font-display text-4xl text-white mb-4">🍎 饮食与体成分</h1>
+      <p className="text-slate-400 mb-8 max-w-md mx-auto text-sm">饮食与体成分功能需要登录后才能使用。点击右上角「👤 登录」按钮创建你的档案。</p>
+      <Link href="/" className="btn-skew bg-[#00F5FF] text-[#0A0A0A] text-sm inline-flex">返回首页</Link>
     </div>
   );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 bg-[#0f172a] min-h-screen">
+    <div className="max-w-4xl mx-auto px-4 py-8 min-h-screen">
       <div className="text-center mb-10">
-        <h1 className="text-3xl font-extrabold text-white mb-2">🍎 饮食与体成分</h1>
-        <p className="text-slate-400">多公式交叉验证 + 完整宏量营养素定制方案</p>
+        <h1 className="font-display text-4xl text-white mb-2 tracking-wide">🍎 饮食与体成分</h1>
+        <p className="text-slate-400 text-sm">多公式交叉验证 + 完整宏量营养素定制方案</p>
       </div>
 
       <div className="grid lg:grid-cols-5 gap-6">
         {/* 输入区 (2列) */}
-        <div className="lg:col-span-2 bg-[#1e293b] border border-slate-700/50 rounded-2xl p-6 self-start">
-          <h2 className="text-lg font-bold text-white mb-5">📏 身体数据</h2>
+        <div className="lg:col-span-2 glass-card p-6 self-start">
+          <h2 className="font-display text-lg text-white mb-5 tracking-wide">📏 身体数据</h2>
 
           {/* 性别 + 年龄 */}
           <div className="grid grid-cols-2 gap-3 mb-4">
@@ -175,7 +175,7 @@ export default function BodyCompPage() {
                 {(["male", "female"] as const).map(g => (
                   <button key={g} onClick={() => setGender(g)}
                     className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all ${
-                      gender === g ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "bg-slate-800 text-slate-500 border border-slate-700/30"
+                      gender === g ? "bg-[#00F5FF]/20 text-[#00F5FF] border border-[#00F5FF]/30" : "bg-white/5 text-slate-500 border border-white/10"
                     }`}>{g === "male" ? "♂" : "♀"}</button>
                 ))}
               </div>
@@ -183,7 +183,7 @@ export default function BodyCompPage() {
             <div>
               <label className="text-xs text-slate-400 mb-1.5 block">年龄</label>
               <input type="number" value={age} onChange={e => setAge(Number(e.target.value))} min={10} max={80}
-                className="w-full bg-slate-800 border border-slate-600/50 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50" />
+                className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00F5FF]/50 transition-colors" />
             </div>
           </div>
 
@@ -192,12 +192,12 @@ export default function BodyCompPage() {
             <div>
               <label className="text-xs text-slate-400 mb-1.5 block">身高 (cm)</label>
               <input type="number" value={height} onChange={e => setHeight(Number(e.target.value))} min={100} max={250}
-                className="w-full bg-slate-800 border border-slate-600/50 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50" />
+                className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00F5FF]/50 transition-colors" />
             </div>
             <div>
               <label className="text-xs text-slate-400 mb-1.5 block">体重 (kg)</label>
               <input type="number" value={weight} onChange={e => setWeight(Number(e.target.value))} min={30} max={200}
-                className="w-full bg-slate-800 border border-slate-600/50 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50" />
+                className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00F5FF]/50 transition-colors" />
             </div>
           </div>
 
@@ -207,23 +207,23 @@ export default function BodyCompPage() {
             <div>
               <label className="text-[10px] text-slate-500 block mb-1">颈围 cm</label>
               <input type="number" value={neck} onChange={e => setNeck(Number(e.target.value))} min={20} max={60}
-                className="w-full bg-slate-800 border border-slate-600/50 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500/50" />
+                className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#00F5FF]/50 transition-colors" />
             </div>
             <div>
               <label className="text-[10px] text-slate-500 block mb-1">腰围 cm</label>
               <input type="number" value={waist} onChange={e => setWaist(Number(e.target.value))} min={40} max={150}
-                className="w-full bg-slate-800 border border-slate-600/50 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500/50" />
+                className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#00F5FF]/50 transition-colors" />
             </div>
             <div>
               <label className="text-[10px] text-slate-500 block mb-1">臀围 cm</label>
               <input type="number" value={hip} onChange={e => setHip(Number(e.target.value))} min={50} max={160}
-                className="w-full bg-slate-800 border border-slate-600/50 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500/50" />
+                className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#00F5FF]/50 transition-colors" />
             </div>
           </div>
 
           {/* 进阶围度 */}
           <button onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full text-xs text-amber-400 hover:text-amber-300 mb-3 flex items-center gap-1">
+            className="w-full text-xs text-[#00F5FF] hover:text-white mb-3 flex items-center gap-1 transition-colors">
             {showAdvanced ? "▲ 收起" : "▼ 展开"}进阶围度（更多数据 → 更精确）
           </button>
           {showAdvanced && (
@@ -231,32 +231,32 @@ export default function BodyCompPage() {
               <div>
                 <label className="text-[10px] text-slate-500 block mb-1">腹围 cm</label>
                 <input type="number" value={abdomen} onChange={e => setAbdomen(Number(e.target.value))} min={40} max={160}
-                  className="w-full bg-slate-800 border border-slate-600/50 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500/50" />
+                  className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#00F5FF]/50 transition-colors" />
               </div>
               <div>
                 <label className="text-[10px] text-slate-500 block mb-1">腕围 cm</label>
                 <input type="number" value={wrist} onChange={e => setWrist(Number(e.target.value))} min={10} max={25}
-                  className="w-full bg-slate-800 border border-slate-600/50 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500/50" />
+                  className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#00F5FF]/50 transition-colors" />
               </div>
               <div>
                 <label className="text-[10px] text-slate-500 block mb-1">前臂 cm</label>
                 <input type="number" value={forearm} onChange={e => setForearm(Number(e.target.value))} min={15} max={45}
-                  className="w-full bg-slate-800 border border-slate-600/50 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500/50" />
+                  className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#00F5FF]/50 transition-colors" />
               </div>
               <div>
                 <label className="text-[10px] text-slate-500 block mb-1">大腿 cm</label>
                 <input type="number" value={thigh} onChange={e => setThigh(Number(e.target.value))} min={30} max={90}
-                  className="w-full bg-slate-800 border border-slate-600/50 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500/50" />
+                  className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#00F5FF]/50 transition-colors" />
               </div>
               <div>
                 <label className="text-[10px] text-slate-500 block mb-1">小腿 cm</label>
                 <input type="number" value={calf} onChange={e => setCalf(Number(e.target.value))} min={20} max={60}
-                  className="w-full bg-slate-800 border border-slate-600/50 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500/50" />
+                  className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#00F5FF]/50 transition-colors" />
               </div>
             </div>
           )}
 
-          <div className="bg-slate-800/50 rounded-lg p-3 mb-5 text-[10px] text-slate-500 leading-relaxed">
+          <div className="bg-white/[0.03] rounded-lg p-3 mb-5 text-[10px] text-slate-500 leading-relaxed border border-white/5">
             📐 测量方法：颈围=喉结下方；腰围=肚脐水平（放松）；臀围=最宽处；腹围=肚脐下2cm；大腿=臀褶下方。皮尺贴合但不勒紧。
           </div>
 
@@ -265,14 +265,14 @@ export default function BodyCompPage() {
             {(["cut", "maintain", "bulk"] as const).map(g => (
               <button key={g} onClick={() => setGoal(g)}
                 className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-                  goal === g ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "bg-slate-800 text-slate-500 border border-slate-700/30"
+                  goal === g ? "bg-[#00F5FF]/20 text-[#00F5FF] border border-[#00F5FF]/30" : "bg-white/5 text-slate-500 border border-white/10"
                 }`}>{g === "cut" ? "🔥 减脂" : g === "bulk" ? "💪 增肌" : "⚖️ 维持"}</button>
             ))}
           </div>
 
           <label className="text-xs text-slate-400 mb-1.5 block">活动水平</label>
           <select value={activityLevel} onChange={e => setActivityLevel(e.target.value as any)}
-            className="w-full bg-slate-800 border border-slate-600/50 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50 mb-5">
+            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00F5FF]/50 mb-5">
             <option value="sedentary">久坐少动（办公室工作）</option>
             <option value="moderate">轻度活跃（每周1-2次训练）</option>
             <option value="active">中度活跃（每周3-5次训练）</option>
@@ -280,7 +280,7 @@ export default function BodyCompPage() {
           </select>
 
           <button onClick={calculate}
-            className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-[#0a0a14] font-bold rounded-xl transition-all shadow-lg shadow-amber-500/25 text-sm">
+            className="btn-skew bg-[#00F5FF] text-[#0A0A0A] text-sm w-full">
             📊 计算体成分与饮食建议
           </button>
         </div>
@@ -288,50 +288,50 @@ export default function BodyCompPage() {
         {/* 结果区 (3列) */}
         <div className="lg:col-span-3">
           {!result ? (
-            <div className="bg-[#1e293b] border border-slate-700/50 rounded-2xl p-12 flex items-center justify-center min-h-[400px]">
+            <div className="glass-card p-12 flex items-center justify-center min-h-[400px]">
               <div className="text-center">
                 <div className="text-6xl mb-4">📊</div>
-                <p className="text-slate-400">填入左侧数据后点击计算</p>
+                <p className="text-slate-400 text-sm">填入左侧数据后点击计算</p>
                 <p className="text-slate-600 text-xs mt-2">三公式交叉验证：US Navy + Covert Bailey + YMCA</p>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
               {/* 体成分概览 */}
-              <div className="bg-[#1e293b] border border-slate-700/50 rounded-2xl p-6">
+              <div className="glass-card p-6">
                 <h3 className="text-sm font-semibold text-slate-400 mb-5">🏋️ 体成分分析（三公式交叉验证）</h3>
                 <div className="text-center mb-6">
                   <div className={`text-5xl font-extrabold ${result.bfColor}`}>{result.bodyFatPct}%</div>
                   <p className="text-sm text-slate-400 mt-1">{result.bfRating}</p>
                 </div>
                 <div className="grid grid-cols-3 gap-2 mb-5">
-                  <div className="bg-slate-800 rounded-lg p-2.5 text-center">
+                  <div className="bg-white/[0.03] border border-white/5 rounded-lg p-2.5 text-center">
                     <p className="text-lg font-bold text-white">{result.navyBF}%</p>
                     <p className="text-[10px] text-slate-500">US Navy 法</p>
                   </div>
-                  <div className="bg-slate-800 rounded-lg p-2.5 text-center">
+                  <div className="bg-white/[0.03] border border-white/5 rounded-lg p-2.5 text-center">
                     <p className="text-lg font-bold text-white">{result.baileyBF}%</p>
                     <p className="text-[10px] text-slate-500">Covert Bailey</p>
                   </div>
-                  <div className="bg-slate-800 rounded-lg p-2.5 text-center">
+                  <div className="bg-white/[0.03] border border-white/5 rounded-lg p-2.5 text-center">
                     <p className="text-lg font-bold text-white">{result.ymcaBF}%</p>
                     <p className="text-[10px] text-slate-500">YMCA 法</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  <div className="bg-slate-800 rounded-lg p-3 text-center">
+                  <div className="bg-white/[0.03] border border-white/5 rounded-lg p-3 text-center">
                     <p className="text-lg font-bold text-white">{result.fatMass} kg</p>
                     <p className="text-[10px] text-slate-500">脂肪重量</p>
                   </div>
-                  <div className="bg-slate-800 rounded-lg p-3 text-center">
+                  <div className="bg-white/[0.03] border border-white/5 rounded-lg p-3 text-center">
                     <p className="text-lg font-bold text-white">{result.leanMass} kg</p>
                     <p className="text-[10px] text-slate-500">瘦体重</p>
                   </div>
-                  <div className="bg-slate-800 rounded-lg p-3 text-center">
+                  <div className="bg-white/[0.03] border border-white/5 rounded-lg p-3 text-center">
                     <p className="text-lg font-bold text-white">{result.bmi}</p>
                     <p className="text-[10px] text-slate-500">BMI</p>
                   </div>
-                  <div className="bg-slate-800 rounded-lg p-3 text-center">
+                  <div className="bg-white/[0.03] border border-white/5 rounded-lg p-3 text-center">
                     <p className="text-lg font-bold text-white">{result.waistToHeight}</p>
                     <p className="text-[10px] text-slate-500">腰围/身高</p>
                   </div>
@@ -343,35 +343,35 @@ export default function BodyCompPage() {
 
               {/* 热量 + 宏量营养素 */}
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-[#1e293b] border border-slate-700/50 rounded-2xl p-5">
+                <div className="glass-card p-5">
                   <h3 className="text-sm font-semibold text-slate-400 mb-4">🔥 热量计算（双公式）</h3>
                   <div className="space-y-2">
                     <div className="flex justify-between"><span className="text-xs text-slate-500">Mifflin-St Jeor BMR</span><span className="text-xs text-white">{result.bmr} kcal</span></div>
                     <div className="flex justify-between"><span className="text-xs text-slate-500">Katch-McArdle BMR</span><span className="text-xs text-white">{result.katchBmr} kcal</span></div>
                     <div className="flex justify-between font-medium"><span className="text-xs text-slate-400">平均 BMR</span><span className="text-xs text-white">{result.avgBmr} kcal</span></div>
-                    <div className="flex justify-between pt-2 border-t border-slate-700/50"><span className="text-xs text-slate-400">TDEE（总消耗）</span><span className="text-sm font-bold text-white">{result.tdee} kcal</span></div>
-                    <div className="flex justify-between pt-2 border-t border-slate-700/50">
-                      <span className="text-xs text-amber-400 font-medium">{result.goal === "cut" ? "🎯 减脂热量" : result.goal === "bulk" ? "🎯 增肌热量" : "🎯 维持热量"}</span>
-                      <span className="text-xl font-extrabold text-amber-400">{result.targetCalories}</span>
+                    <div className="flex justify-between pt-2 border-t border-white/10"><span className="text-xs text-slate-400">TDEE（总消耗）</span><span className="text-sm font-bold text-white">{result.tdee} kcal</span></div>
+                    <div className="flex justify-between pt-2 border-t border-white/10">
+                      <span className="text-xs text-[#00F5FF] font-medium">{result.goal === "cut" ? "🎯 减脂热量" : result.goal === "bulk" ? "🎯 增肌热量" : "🎯 维持热量"}</span>
+                      <span className="text-xl font-extrabold text-[#00F5FF]">{result.targetCalories}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-[#1e293b] border border-slate-700/50 rounded-2xl p-5">
+                <div className="glass-card p-5">
                   <h3 className="text-sm font-semibold text-slate-400 mb-4">🥩 每日宏量营养素</h3>
                   <div className="space-y-3">
                     {[
-                      { label: "🥚 蛋白质", value: result.dailyProtein, unit: "g", cals: result.dailyProtein * 4, color: "green", note: `${result.proteinPerKg} g/kg` },
-                      { label: "🧈 脂肪", value: result.dailyFat, unit: "g", cals: result.dailyFat * 9, color: "amber", note: "" },
-                      { label: "🍚 碳水", value: result.dailyCarbs, unit: "g", cals: result.dailyCarbs * 4, color: "blue", note: "" },
+                      { label: "🥚 蛋白质", value: result.dailyProtein, unit: "g", cals: result.dailyProtein * 4, note: `${result.proteinPerKg} g/kg`, color: "text-green-400", barColor: "bg-green-500", bgBar: "bg-green-500" },
+                      { label: "🧈 脂肪", value: result.dailyFat, unit: "g", cals: result.dailyFat * 9, note: "", color: "text-amber-400", barColor: "bg-amber-500", bgBar: "bg-amber-500" },
+                      { label: "🍚 碳水", value: result.dailyCarbs, unit: "g", cals: result.dailyCarbs * 4, note: "", color: "text-cyan-400", barColor: "bg-cyan-500", bgBar: "bg-cyan-500" },
                     ].map(m => (
-                      <div key={m.label} className="bg-slate-800 rounded-lg p-3">
+                      <div key={m.label} className="bg-white/[0.03] border border-white/5 rounded-lg p-3">
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-xs text-slate-400">{m.label}</span>
-                          <span className={`text-lg font-extrabold text-${m.color}-400`}>{m.value}{m.unit}</span>
+                          <span className={`text-lg font-extrabold ${m.color}`}>{m.value}{m.unit}</span>
                         </div>
-                        <div className="w-full bg-slate-700 rounded-full h-1.5">
-                          <div className={`bg-${m.color}-500 h-1.5 rounded-full`} style={{ width: `${Math.round((m.cals / result.targetCalories) * 100)}%` }} />
+                        <div className="w-full bg-white/10 rounded-full h-1.5">
+                          <div className={`h-1.5 rounded-full ${m.barColor}`} style={{ width: `${Math.round((m.cals / result.targetCalories) * 100)}%` }} />
                         </div>
                         <p className="text-[10px] text-slate-500 mt-1">{m.cals} kcal{m.note ? ` · ${m.note}` : ""}</p>
                       </div>
@@ -381,9 +381,9 @@ export default function BodyCompPage() {
               </div>
 
               {/* 专属建议 */}
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-5">
-                <h3 className="text-sm font-semibold text-amber-300 mb-3">💡 弹跳训练者专属建议</h3>
-                <div className="text-xs text-amber-200/80 leading-relaxed space-y-2">
+              <div className="bg-[#00F5FF]/5 border border-[#00F5FF]/20 rounded-2xl p-5">
+                <h3 className="text-sm font-semibold text-[#00F5FF] mb-3">💡 弹跳训练者专属建议</h3>
+                <div className="text-xs text-slate-300/80 leading-relaxed space-y-2">
                   <p>• 每减 1kg 纯脂肪（力量不变）→ 弹跳提升约 0.5-1.5cm。减脂期 ≥2.0g/kg 蛋白质，热量缺口 ≤500kcal/天。</p>
                   <p>• 增肌期目标 +0.5-1kg 瘦体重/月。体脂同步微增正常，控制体脂月增幅 &lt;0.5%。</p>
                   <p>• 碳水策略：训练日 4-5g/kg，休息日 2-3g/kg。脂肪以不饱和脂肪酸为主。</p>

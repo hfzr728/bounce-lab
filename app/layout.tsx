@@ -1,19 +1,29 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Bebas_Neue, Rajdhani } from "next/font/google";
 import "./globals.css";
 import { Header, Footer } from "@/components/layout/shared";
 import { UserProvider } from "@/lib/user/context";
 import { ToastProvider } from "@/components/ui/toast";
 import { FeedbackButton } from "@/components/feedback/feedback-button";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const bebasNeue = Bebas_Neue({
+  weight: "400",
   subsets: ["latin"],
+  variable: "--font-bebas",
+  display: "swap",
+});
+
+const rajdhani = Rajdhani({
+  weight: ["500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-rajdhani",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -29,9 +39,9 @@ export default function RootLayout({
   return (
     <html
       lang="zh-CN"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${bebasNeue.variable} ${rajdhani.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#0f172a] text-gray-900">
+      <body className="min-h-full flex flex-col bg-[#0A0A0A] text-slate-200">
         <UserProvider>
           <ToastProvider>
             <Header />
