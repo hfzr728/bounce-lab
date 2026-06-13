@@ -29,7 +29,7 @@ export function ProgressBar({ urlStep }: ProgressBarProps) {
         />
       </div>
       <div className="flex justify-between mt-2">
-        {["人体", "结构", "力量", "爆发", "活动度", "耐力", "经验", "生活", "目标"].map(
+        {["人体", "力量", "爆发", "活动度", "增强式", "臀肌", "伤病", "恢复", "心理", "技术"].map(
           (label, i) => (
             <span
               key={i}

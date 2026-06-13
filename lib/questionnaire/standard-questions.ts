@@ -1,107 +1,202 @@
 // ============================================================
-// 国际标准版评估问卷 — 约 50 题，基于 NSCA/FMS/YBT 等标准
-// 无需测力台、无需专业设备，用简单工具即可完成
+// 进阶版评估问卷 — 10 维度，约 59 题
+// 无需专业设备，简单测量即可，8-10 分钟完成
 // 适合：有训练基础、想获得专业级诊断的运动者
 // ============================================================
 
 import { Question } from "./types";
 
 export const standardQuestions: Question[] = [
-  // ================================================================
-  // 模块 1：人体测量 (anthropometry)
-  // ================================================================
-  { id: "st01", type: "number", text: "您的年龄？", unit: "岁", numberRange: { min: 12, max: 60 }, required: true, dimension: "anthropometry" },
-  { id: "st02", type: "select", text: "您的性别？", options: [{ label: "男", value: "male" }, { label: "女", value: "female" }], required: true, dimension: "anthropometry" },
-  { id: "st03", type: "number", text: "您的赤脚身高？", unit: "cm", numberRange: { min: 140, max: 230 }, required: true, dimension: "anthropometry" },
-  { id: "st04", type: "number", text: "您的体重（早晨空腹）？", unit: "kg", numberRange: { min: 35, max: 180 }, required: true, dimension: "anthropometry" },
-  { id: "st05", type: "number", text: "您的体脂率大约是多少？", hint: "用皮脂钳（几十元）或体脂秤测量；无设备可自估：腹肌清晰≈8-10%，隐约可见≈12-15%，平坦≈16-20%", unit: "%", numberRange: { min: 5, max: 45 }, required: true, dimension: "anthropometry" },
-  { id: "st06", type: "number", text: "您的站立单手摸高（赤脚）？", hint: "赤足单手尽量向上伸展", unit: "cm", numberRange: { min: 180, max: 310 }, required: true, dimension: "anthropometry" },
-  { id: "st07", type: "select", text: "您的骨架粗细（目测即可）？", options: [{ label: "偏细", value: "small" }, { label: "中等", value: "medium" }, { label: "偏粗", value: "large" }], required: true, dimension: "anthropometry" },
+  // 维度 1：基础身体信息与运动背景 — 6题
+  { id: "av01", type: "number", text: "你的年龄是多少岁？", unit: "岁", numberRange: { min: 12, max: 70 }, required: true, dimension: "anthropometry" },
+  { id: "av02", type: "select", text: "你的性别是？", options: [{ label: "男", value: "male" }, { label: "女", value: "female" }], required: true, dimension: "anthropometry" },
+  { id: "av03", type: "number", text: "你的裸足身高？", hint: "赤足靠墙站立测量", unit: "cm", numberRange: { min: 140, max: 230 }, required: true, dimension: "anthropometry" },
+  { id: "av05", type: "select", text: "你的体型属于？", options: [
+    { label: "偏瘦（男≤12%，女≤18%）", value: "lean" }, { label: "标准（男13-18%，女19-25%）", value: "standard" }, { label: "偏高（男19-25%，女26-32%）", value: "high" }, { label: "肥胖（男>25%，女>32%）", value: "obese" },
+  ], required: true, dimension: "anthropometry" },
+  { id: "av06", type: "select", text: "规律力量/爆发力/跳跃训练已有多少年？", options: [
+    { label: "不到半年", value: "lt05" }, { label: "半年到1年", value: "05-1" }, { label: "1-3年", value: "1-3" }, { label: "3年以上", value: "gt3" },
+  ], required: true, dimension: "anthropometry" },
+  { id: "av09", type: "select", text: "是否曾连续至少2年规律参与跳跃类运动？", options: [
+    { label: "是", value: "yes" }, { label: "否", value: "no" },
+  ], required: true, dimension: "anthropometry" },
 
-  // ================================================================
-  // 模块 2：身体比例与结构 (proportion)
-  // ================================================================
-  { id: "st08", type: "select", text: "您的上下身比例（下身/上身）？", hint: "下身(大转子到足底)/上身(身高-下身)。>1.08 对跳跃有利", options: [{ label: "下身较长（>1.08）", value: "long_legs" }, { label: "比例均衡（0.95-1.08）", value: "balanced" }, { label: "上身较长（<0.95）", value: "long_torso" }, { label: "未测量", value: "unknown" }], required: true, dimension: "proportion" },
-  { id: "st09", type: "select", text: "您的足弓类型？", hint: "湿脚踩纸法观察足印", options: [{ label: "高足弓", value: "high" }, { label: "正常足弓", value: "normal" }, { label: "扁平足", value: "flat" }, { label: "未评估", value: "unknown" }], required: false, dimension: "proportion" },
-  { id: "st10", type: "select", text: "您的整体运动协调性？", options: [{ label: "优秀（学新动作快）", value: "excellent" }, { label: "良好", value: "good" }, { label: "一般", value: "average" }, { label: "较差", value: "poor" }], required: true, dimension: "proportion" },
-  { id: "st11", type: "multiSelect", text: "您是否有明显体态问题？（可多选）", options: [{ label: "骨盆前倾", value: "apt" }, { label: "驼背/圆肩", value: "kyphosis" }, { label: "X/O型腿", value: "leg_align" }, { label: "无明显问题", value: "none" }], required: true, dimension: "proportion" },
+  // 维度 2：力量素质 — 6题
+  { id: "av11", type: "select", text: "杠铃深蹲最大重量约体重的多少倍？", options: [
+    { label: "无法完成自重深蹲", value: "none" }, { label: "可完成自重深蹲", value: "bw" }, { label: "<1倍体重", value: "lt1x" }, { label: "1-1.3倍", value: "1-1.3x" }, { label: "1.3-1.6倍", value: "1.3-1.6x" }, { label: "1.6-2.0倍", value: "1.6-2x" }, { label: ">2.0倍", value: "gt2x" },
+  ], required: true, dimension: "maxStrength" },
+  { id: "av13", type: "select", text: "能否不扶墙单腿下蹲至大腿平行地面？", options: [
+    { label: "左右都能轻松≥5次", value: "both_easy" }, { label: "只能1-4次或仅单侧", value: "limited" }, { label: "无法完成", value: "cannot" }, { label: "未尝试", value: "unknown" },
+  ], required: false, dimension: "maxStrength" },
+  { id: "av14", type: "select", text: "单腿提踵（踮脚尖）最多连续多少次？", options: [
+    { label: "<10次", value: "lt10" }, { label: "10-15次", value: "10-15" }, { label: "16-25次", value: "16-25" }, { label: ">25次", value: "gt25" }, { label: "未测", value: "unknown" },
+  ], required: false, dimension: "maxStrength" },
+  { id: "av17", type: "select", text: "每周下肢力量训练天数？", options: [
+    { label: "0天", value: "0" }, { label: "1天", value: "1" }, { label: "2天", value: "2" }, { label: "3天", value: "3" }, { label: "≥4天", value: "ge4" },
+  ], required: true, dimension: "maxStrength" },
+  { id: "av18", type: "select", text: "过去3个月深蹲力量变化趋势？", options: [
+    { label: "明显增长", value: "growing" }, { label: "缓慢增长", value: "slow" }, { label: "基本稳定", value: "stable" }, { label: "下降或停滞", value: "decline" }, { label: "刚开始训练", value: "new" },
+  ], required: false, dimension: "maxStrength" },
+  { id: "av19", type: "multiSelect", text: "下肢力量训练中是否出现过以下疼痛？", options: [
+    { label: "无疼痛", value: "none" }, { label: "膝盖前侧", value: "knee" }, { label: "下背部", value: "lowback" }, { label: "跟腱", value: "achilles" }, { label: "腹股沟/髋", value: "hip" },
+  ], required: true, dimension: "maxStrength" },
 
-  // ================================================================
-  // 模块 3：力量水平 (maxStrength) — 无需1RM实测，可用估算
-  // ================================================================
-  { id: "st12", type: "select", text: "您的杠铃深蹲水平（估算即可）？", hint: "如不确定1RM，按「能做5次的重量×1.15」估算", options: [{ label: "精英（≥2.0倍体重）", value: "elite" }, { label: "高级（1.5-2.0xBW）", value: "advanced" }, { label: "中级（1.0-1.5xBW）", value: "intermediate" }, { label: "初级（0.5-1.0xBW）", value: "novice" }, { label: "几乎无杠铃训练", value: "none" }], required: true, dimension: "maxStrength" },
-  { id: "st13", type: "select", text: "您的硬拉水平（估算即可）？", options: [{ label: "精英（≥2.5xBW）", value: "elite" }, { label: "高级（2.0-2.5xBW）", value: "advanced" }, { label: "中级（1.5-2.0xBW）", value: "intermediate" }, { label: "初级（1.0-1.5xBW）", value: "novice" }, { label: "几乎无硬拉训练", value: "none" }], required: false, dimension: "maxStrength" },
-  { id: "st14", type: "select", text: "您的保加利亚分腿蹲单侧能力？", hint: "单侧力量对弹跳至关重要", options: [{ label: "优秀（负重>50%体重×8次）", value: "excellent" }, { label: "良好（负重30-50%体重）", value: "good" }, { label: "一般（自重8-12次）", value: "average" }, { label: "较弱（自重<5次）", value: "weak" }, { label: "未做过", value: "unknown" }], required: true, dimension: "maxStrength" },
-  { id: "st15", type: "select", text: "您的核心抗旋能力（Pallof Press）？", options: [{ label: "强（弹力带/龙门架 ≥20kg 稳定）", value: "strong" }, { label: "良好", value: "good" }, { label: "一般（平板支撑 30-60s）", value: "average" }, { label: "较弱（平板支撑 <30s）", value: "weak" }], required: true, dimension: "maxStrength" },
-  { id: "st16", type: "select", text: "您的左右腿力量差异？", options: [{ label: "<5%（很均衡）", value: "balanced" }, { label: "5-10%（可接受）", value: "slight" }, { label: "10-20%（需关注）", value: "moderate" }, { label: ">20%（高风险）", value: "severe" }, { label: "未测试", value: "unknown" }], required: true, dimension: "maxStrength" },
-  { id: "st17", type: "select", text: "您的臀肌激活模式？", hint: "单腿臀桥测试：能否无代偿完成15次以上？", options: [{ label: "优秀（臀主导，无代偿）", value: "excellent" }, { label: "良好（轻微代偿）", value: "good" }, { label: "一般（股四头肌/下背代偿明显）", value: "average" }, { label: "臀肌不足", value: "quad_dom" }], required: false, dimension: "maxStrength" },
+  // 维度 3：垂直跳与爆发力 — 6题
+  { id: "av20", type: "select", text: "站立垂直跳高度大约？", options: [
+    { label: "很低（<30cm）", value: "lt30" }, { label: "较低（30-40cm）", value: "30-40" }, { label: "中等（40-55cm）", value: "40-55" }, { label: "较高（55-70cm）", value: "55-70" }, { label: "很高（>70cm）", value: "gt70" },
+  ], required: false, dimension: "powerSpeed" },
+  { id: "av21", type: "select", text: "3-5步助跑起跳与站立跳相比？", options: [
+    { label: "明显更高（高出10-20cm）", value: "much_higher" }, { label: "略高（5-10cm）", value: "slightly" }, { label: "差不多（<5cm）", value: "same" }, { label: "从未比较", value: "unknown" },
+  ], required: false, dimension: "powerSpeed" },
+  { id: "av23", type: "select", text: "从30-50cm箱跳下立即反弹起跳，感觉？", options: [
+    { label: "从未尝试", value: "never" }, { label: "反弹跳与站立跳差不多或更高", value: "equal" }, { label: "反弹跳明显更低", value: "lower" }, { label: "落地时膝盖/脚踝压力大", value: "painful" },
+  ], required: false, dimension: "powerSpeed" },
+  { id: "av24", type: "select", text: "连续膝胸跳（膝盖提到胸部）最多多少次？", options: [
+    { label: "<6次", value: "lt6" }, { label: "6-10次", value: "6-10" }, { label: "11-15次", value: "11-15" }, { label: ">15次", value: "gt15" }, { label: "未尝试", value: "unknown" },
+  ], required: false, dimension: "powerSpeed" },
+  { id: "av26", type: "select", text: "立定跳远大约多远？", options: [
+    { label: "未测量", value: "unknown" }, { label: "<200cm", value: "lt200" }, { label: "200-230cm", value: "200-230" }, { label: "230-260cm", value: "230-260" }, { label: ">260cm", value: "gt260" },
+  ], required: false, dimension: "powerSpeed" },
+  { id: "av29", type: "select", text: "不同日期垂直跳成绩波动大吗？", options: [
+    { label: "波动很小（±5%）", value: "small" }, { label: "波动中等（5-10%）", value: "medium" }, { label: "波动很大（>10%）", value: "large" }, { label: "未关注", value: "unknown" },
+  ], required: false, dimension: "powerSpeed" },
 
-  // ================================================================
-  // 模块 4：爆发力与速度 (powerSpeed) — 用手机App即可测量
-  // ================================================================
-  { id: "st18", type: "number", text: "您的原地反向纵跳 CMJ 高度？", hint: "用 My Jump 2（免费App）拍摄跳跃即可自动计算，无需测力台", unit: "cm", numberRange: { min: 15, max: 100 }, required: false, dimension: "powerSpeed" },
-  { id: "st19", type: "number", text: "您的助跑摸高最大高度？", hint: "助跑后单脚或双脚起跳摸高", unit: "cm", numberRange: { min: 220, max: 400 }, required: false, dimension: "powerSpeed" },
-  { id: "st20", type: "number", text: "您的立定跳远成绩？", unit: "cm", numberRange: { min: 120, max: 350 }, required: false, dimension: "powerSpeed" },
-  { id: "st21", type: "number", text: "您的 30 米冲刺时间？", hint: "用手机秒表或计时App即可", unit: "秒", numberRange: { min: 3.0, max: 7.0 }, required: false, dimension: "powerSpeed" },
-  { id: "st22", type: "select", text: "您的发力率（RFD）自评？", hint: "从静止到最大力量输出的速度——起跳是否迅猛", options: [{ label: "极快（起跳迅猛干脆）", value: "explosive" }, { label: "良好", value: "good" }, { label: "一般（有力量但爆发速度不够）", value: "slow_str" }, { label: "偏慢", value: "slow" }], required: true, dimension: "powerSpeed" },
-  { id: "st23", type: "select", text: "您最接近哪种力-速特征？", hint: "力量型=慢速大力量；速度型=快速轻负荷", options: [{ label: "力量主导（深蹲强但跳跃表现不如预期）", value: "force_dom" }, { label: "速度主导（跳跃好但力量相对弱）", value: "velo_dom" }, { label: "均衡型", value: "balanced" }, { label: "不确定", value: "unknown" }], required: true, dimension: "powerSpeed" },
-  { id: "st24", type: "select", text: "您的训练中力量与增强式比例？", options: [{ label: "以力量为主（>70%）", value: "strength_heavy" }, { label: "各半（50/50）", value: "balanced" }, { label: "以增强式为主（>70%）", value: "plyo_heavy" }, { label: "不确定", value: "unknown" }], required: false, dimension: "powerSpeed" },
+  // 维度 4：反应力量与增强式 — 6题
+  { id: "av30", type: "select", text: "是否有跳深（Depth Jump）训练经验？", options: [
+    { label: "从未尝试", value: "never" }, { label: "很少（<每月2次）", value: "rare" }, { label: "偶尔（每月2-4次）", value: "occasional" }, { label: "规律训练（每周≥1次）", value: "regular" },
+  ], required: false, dimension: "powerSpeed" },
+  { id: "av32", type: "select", text: "单腿跳深（单脚着地反弹起跳）能力？", options: [
+    { label: "从未尝试", value: "never" }, { label: "只能优势腿或不稳定", value: "unstable" }, { label: "左右腿都能完成", value: "both_stable" }, { label: "落地很轻盈", value: "light" },
+  ], required: false, dimension: "powerSpeed" },
+  { id: "av35", type: "select", text: "你的短跑速度（30米）在伙伴中属于？", options: [
+    { label: "很慢", value: "very_slow" }, { label: "偏慢", value: "slow" }, { label: "中等", value: "medium" }, { label: "较快", value: "fast" }, { label: "很快", value: "very_fast" },
+  ], required: false, dimension: "powerSpeed" },
+  { id: "av36", type: "select", text: "高强度跳跃训练后需要几天恢复？", options: [
+    { label: "1天内", value: "1d" }, { label: "2天", value: "2d" }, { label: "3-4天", value: "3-4d" }, { label: "≥5天", value: "ge5d" }, { label: "未做过增强式", value: "never" },
+  ], required: false, dimension: "powerSpeed" },
+  { id: "av37", type: "multiSelect", text: "跳跃训练中是否出现过以下疼痛？", options: [
+    { label: "无疼痛", value: "none" }, { label: "跟腱", value: "achilles" }, { label: "膝盖前侧", value: "knee" }, { label: "胫骨前侧", value: "shin" }, { label: "足底", value: "plantar" },
+  ], required: false, dimension: "powerSpeed" },
+  { id: "av39", type: "select", text: "每周专门增强式训练次数？", options: [
+    { label: "0次", value: "0" }, { label: "1次", value: "1" }, { label: "2次", value: "2" }, { label: "≥3次", value: "ge3" },
+  ], required: false, dimension: "powerSpeed" },
 
-  // ================================================================
-  // 模块 5：FMS 功能性运动筛查 (mobility) — 7项基础动作，无需设备
-  // ================================================================
-  { id: "st25", type: "select", text: "【FMS-1】深蹲（Deep Squat）— 双手举杆过头蹲？", hint: "用扫帚杆或PVC管即可。满分3分=杆在脚正上方、躯干与胫骨平行、大腿低于水平、膝不超脚尖", options: [{ label: "3分—完美完成", value: "3" }, { label: "2分—完成但有代偿（如垫高脚跟）", value: "2" }, { label: "1分—无法完成", value: "1" }, { label: "0分—动作引起疼痛", value: "0" }], required: true, dimension: "mobility" },
-  { id: "st26", type: "select", text: "【FMS-2】跨栏步（Hurdle Step）— 单腿跨过胫骨高度障碍？", hint: "障碍高度=胫骨粗隆高度。满分=髋膝踝对齐、躯干稳定", options: [{ label: "3分—完美完成", value: "3" }, { label: "2分—完成但有晃动", value: "2" }, { label: "1分—触碰障碍或失衡", value: "1" }, { label: "0分—疼痛", value: "0" }], required: true, dimension: "mobility" },
-  { id: "st27", type: "select", text: "【FMS-3】直线弓步（Inline Lunge）— 前后脚在一条线上蹲？", hint: "后脚脚尖距前脚脚跟=胫骨长度。满分=杆接触脊柱三点、躯干稳定", options: [{ label: "3分—完美完成", value: "3" }, { label: "2分—完成但有晃动或脚跟离地", value: "2" }, { label: "1分—无法保持平衡", value: "1" }, { label: "0分—疼痛", value: "0" }], required: true, dimension: "mobility" },
-  { id: "st28", type: "select", text: "【FMS-4】肩部活动度（Shoulder Mobility）— 双手背后互触？", hint: "一只手从上往下、另一只从下往上在背后靠拢。满分=双拳距<一只手长", options: [{ label: "3分—双拳距离<手长", value: "3" }, { label: "2分—双拳距离<1.5手长", value: "2" }, { label: "1分—双拳距离>1.5手长", value: "1" }, { label: "0分—疼痛", value: "0" }], required: true, dimension: "mobility" },
-  { id: "st29", type: "select", text: "【FMS-5】主动直腿抬高（ASLR）— 仰卧单腿直抬？", hint: "满分=外踝垂线超过对侧大腿中点", options: [{ label: "3分—超过大腿中点", value: "3" }, { label: "2分—超过膝盖", value: "2" }, { label: "1分—不到膝盖", value: "1" }, { label: "0分—疼痛", value: "0" }], required: true, dimension: "mobility" },
-  { id: "st30", type: "select", text: "【FMS-6】躯干稳定俯卧撑（Trunk Stability Pushup）— 俯卧撑起？", hint: "男性拇指对齐额头、女性拇指对齐下巴。满分=身体整体撑起无滞后", options: [{ label: "3分—完美完成", value: "3" }, { label: "2分—拇指在下巴位置完成", value: "2" }, { label: "1分—无法完成", value: "1" }, { label: "0分—疼痛", value: "0" }], required: true, dimension: "mobility" },
-  { id: "st31", type: "select", text: "【FMS-7】旋转稳定性（Rotary Stability）— 四足跪姿对侧伸展？", hint: "满分=同侧完成（肩膝同时伸展后肘膝触碰）", options: [{ label: "3分—同侧完美完成", value: "3" }, { label: "2分—对侧方式完成", value: "2" }, { label: "1分—无法完成", value: "1" }, { label: "0分—疼痛", value: "0" }], required: true, dimension: "mobility" },
-  { id: "st32", type: "number", text: "您的坐位体前屈成绩？", hint: "指尖超过脚尖为正", unit: "cm", numberRange: { min: -30, max: 40 }, required: false, dimension: "mobility" },
-  { id: "st33", type: "select", text: "您的踝关节背屈活动度（膝到墙测试）？", hint: "脚尖距墙多远时膝盖能触墙。弹跳最关键关节活动度", options: [{ label: "优秀（>13cm）", value: "excellent" }, { label: "良好（10-13cm）", value: "good" }, { label: "一般（6-10cm）", value: "average" }, { label: "受限（<6cm）", value: "poor" }, { label: "未测试", value: "unknown" }], required: true, dimension: "mobility" },
+  // 维度 5：灵活性/活动度 — 6题
+  { id: "av40", type: "select", text: "徒手深蹲时足跟是否抬离地面？", options: [
+    { label: "从不", value: "never" }, { label: "偶尔", value: "sometimes" }, { label: "经常", value: "often" }, { label: "必须垫高才能蹲", value: "must_elevate" },
+  ], required: false, dimension: "mobility" },
+  { id: "av41", type: "select", text: "深蹲最低点时下背部是否明显圆起？", options: [
+    { label: "保持平直", value: "flat" }, { label: "偶尔圆起", value: "sometimes" }, { label: "经常圆起", value: "often" }, { label: "无法避免", value: "unavoidable" },
+  ], required: false, dimension: "mobility" },
+  { id: "av42", type: "select", text: "坐姿体前屈手指能触到哪？", options: [
+    { label: "手掌超过脚尖", value: "excellent" }, { label: "指尖触到脚尖", value: "touch" }, { label: "距脚尖5-10cm", value: "5-10" }, { label: "距脚尖>10cm", value: "gt10" },
+  ], required: false, dimension: "mobility" },
+  { id: "av43", type: "select", text: "仰卧抱膝至胸前，另一侧大腿位置？", options: [
+    { label: "明显上抬（高于水平）", value: "tight" }, { label: "与床面平行", value: "parallel" }, { label: "自然下落", value: "loose" }, { label: "未测试", value: "unknown" },
+  ], required: false, dimension: "mobility" },
+  { id: "av44", type: "select", text: "闭眼单腿站立能保持多少秒？", options: [
+    { label: "<5秒", value: "lt5" }, { label: "5-10秒", value: "5-10" }, { label: "10-20秒", value: "10-20" }, { label: ">20秒", value: "gt20" }, { label: "未测试", value: "unknown" },
+  ], required: false, dimension: "mobility" },
+  { id: "av47", type: "select", text: "过顶深蹲（轻杆过头）躯干会前倾吗？", options: [
+    { label: "躯干直立", value: "upright" }, { label: "略微前倾", value: "slight" }, { label: "明显前倾", value: "lean" }, { label: "无法完成", value: "cannot" },
+  ], required: false, dimension: "mobility" },
 
-  // ================================================================
-  // 模块 6：YBT 下肢平衡测试 (功能性) 
-  // ================================================================
-  { id: "st34", type: "select", text: "单腿站立稳定性？", hint: "闭眼单腿站立持续时间", options: [{ label: "优秀（>60秒）", value: "excellent" }, { label: "良好（30-60秒）", value: "good" }, { label: "一般（10-30秒）", value: "average" }, { label: "较差（<10秒）", value: "poor" }], required: true, dimension: "mobility" },
-  { id: "st35", type: "select", text: "单腿跳跃落地稳定性？", hint: "单腿跳远后落地能否稳定保持2秒不晃动？", options: [{ label: "优秀（落地安静稳定）", value: "excellent" }, { label: "良好（轻微晃动）", value: "good" }, { label: "一般（明显晃动或另一脚触地）", value: "average" }, { label: "较差（无法稳定落地）", value: "poor" }], required: true, dimension: "mobility" },
+  // 维度 6：臀肌功能 — 6题
+  { id: "av50", type: "select", text: "10次最大垂直跳后哪里最酸？", options: [
+    { label: "臀部（臀肌主导）", value: "glute" }, { label: "轻微臀感", value: "slight" }, { label: "大腿前侧（股四头肌主导）", value: "quad" }, { label: "从未注意", value: "unknown" },
+  ], required: false, dimension: "glute" },
+  { id: "av51", type: "select", text: "深蹲训练后24-48小时哪里最酸痛？", options: [
+    { label: "臀部", value: "glute" }, { label: "大腿前侧", value: "quad" }, { label: "大腿后侧", value: "hamstring" }, { label: "下背部", value: "lowback" }, { label: "几乎不酸痛", value: "none" },
+  ], required: false, dimension: "glute" },
+  { id: "av52", type: "select", text: "单腿臀桥能维持骨盆稳定多少秒？", options: [
+    { label: "<10秒", value: "lt10" }, { label: "10-20秒", value: "10-20" }, { label: "20-30秒", value: "20-30" }, { label: ">30秒", value: "gt30" }, { label: "未测试", value: "unknown" },
+  ], required: false, dimension: "glute" },
+  { id: "av53", type: "select", text: "从高处落地时膝盖是否内扣？", options: [
+    { label: "从不", value: "never" }, { label: "偶尔", value: "sometimes" }, { label: "经常", value: "often" }, { label: "未注意", value: "unknown" },
+  ], required: false, dimension: "glute" },
+  { id: "av57", type: "select", text: "平均每天久坐时间？", options: [
+    { label: "<4小时", value: "lt4" }, { label: "4-6小时", value: "4-6" }, { label: "6-8小时", value: "6-8" }, { label: ">8小时", value: "gt8" },
+  ], required: true, dimension: "glute" },
+  { id: "av58", type: "select", text: "每周有意识地做臀肌激活训练？", options: [
+    { label: "每次训练前", value: "always" }, { label: "每周2-3次", value: "2-3" }, { label: "每周1次", value: "1" }, { label: "偶尔", value: "rarely" }, { label: "从不", value: "never" },
+  ], required: false, dimension: "glute" },
 
-  // ================================================================
-  // 模块 7：耐力与能量系统 (endurance)
-  // ================================================================
-  { id: "st36", type: "select", text: "您的有氧基础水平？", hint: "能否轻松完成30分钟持续运动（跑步/骑车/游泳）？", options: [{ label: "优秀（轻松跑5km）", value: "excellent" }, { label: "良好（能跑3km）", value: "good" }, { label: "一般（勉强1-2km）", value: "average" }, { label: "较差（跑几分钟就喘）", value: "poor" }], required: true, dimension: "endurance" },
-  { id: "st37", type: "select", text: "高强度训练后恢复速度？", hint: "做完一组高强度训练后多久能恢复？", options: [{ label: "很快（1-2分钟即可）", value: "fast" }, { label: "正常（2-3分钟）", value: "normal" }, { label: "偏慢（3-5分钟）", value: "slow" }, { label: "很慢（>5分钟）", value: "very_slow" }], required: true, dimension: "endurance" },
-  { id: "st38", type: "select", text: "您的静息心率大约？", hint: "早晨醒来躺着测", options: [{ label: "<50 bpm（优秀有氧基础）", value: "excellent" }, { label: "50-65 bpm（良好）", value: "good" }, { label: "65-80 bpm（一般）", value: "average" }, { label: ">80 bpm（需改善）", value: "poor" }, { label: "不清楚", value: "unknown" }], required: false, dimension: "endurance" },
+  // 维度 7：伤病史与安全 — 5题
+  { id: "av60", type: "select", text: "过去1年内膝盖前侧疼痛（跳跃/下蹲时）？", options: [
+    { label: "无", value: "none" }, { label: "偶尔轻微", value: "mild" }, { label: "经常，曾减少训练", value: "frequent" }, { label: "目前有痛", value: "current" },
+  ], required: true, dimension: "injury" },
+  { id: "av61", type: "select", text: "跟腱或小腿后侧是否出现过疼痛？", options: [
+    { label: "无", value: "none" }, { label: "偶尔轻微", value: "mild" }, { label: "经常或目前存在", value: "frequent" },
+  ], required: true, dimension: "injury" },
+  { id: "av62", type: "select", text: "过去1年内下背部疼痛（深蹲/跳跃时）？", options: [
+    { label: "无", value: "none" }, { label: "偶尔休息后消失", value: "mild" }, { label: "经常或目前存在", value: "frequent" },
+  ], required: true, dimension: "injury" },
+  { id: "av63", type: "select", text: "脚踝曾扭伤过吗？现在感觉不稳？", options: [
+    { label: "从未扭伤", value: "never" }, { label: "1-2次已康复", value: "healed" }, { label: "多次或感觉不稳", value: "unstable" },
+  ], required: true, dimension: "injury" },
+  { id: "av69", type: "select", text: "现在有疼痛让你不敢全力跳吗？", options: [
+    { label: "无，可全力训练", value: "none" }, { label: "轻微不适", value: "mild" }, { label: "明显疼痛", value: "significant" }, { label: "医生建议暂停", value: "stop" },
+  ], required: true, dimension: "injury" },
 
-  // ================================================================
-  // 模块 8：训练经验与伤病 (trainingHx)
-  // ================================================================
-  { id: "st39", type: "select", text: "您的系统训练年限？", options: [{ label: "5年以上", value: "5y+" }, { label: "2-5年", value: "2-5y" }, { label: "1-2年", value: "1-2y" }, { label: "6个月-1年", value: "6m-1y" }, { label: "<6个月", value: "<6m" }], required: true, dimension: "trainingHx" },
-  { id: "st40", type: "select", text: "您是否有弹跳专项训练经验？", options: [{ label: "系统训练过（有教练或有计划）", value: "yes_sys" }, { label: "自己练过一些", value: "yes_casual" }, { label: "没练过", value: "no" }], required: true, dimension: "trainingHx" },
-  { id: "st41", type: "multiSelect", text: "您有过哪些下肢伤病？（可多选）", options: [{ label: "膝盖伤（髌腱炎/半月板/ACL等）", value: "knee" }, { label: "踝关节扭伤", value: "ankle" }, { label: "腰背伤", value: "back" }, { label: "跟腱炎", value: "achilles" }, { label: "胫骨骨膜炎", value: "shin" }, { label: "以上均无", value: "none" }], required: true, dimension: "trainingHx" },
-  { id: "st42", type: "select", text: "最近一次伤病是什么时候？", options: [{ label: "目前有伤", value: "current" }, { label: "半年内", value: "6m" }, { label: "半年到一年前", value: "1y" }, { label: "一年以上", value: "old" }, { label: "没有受过伤", value: "never" }], required: true, dimension: "trainingHx" },
-  { id: "st43", type: "select", text: "您每次训练前是否有系统热身习惯？", options: [{ label: "有，10分钟以上系统热身", value: "yes_full" }, { label: "有，但比较简单", value: "yes_brief" }, { label: "偶尔热身", value: "occasional" }, { label: "从不热身", value: "never" }], required: true, dimension: "trainingHx" },
+  // 维度 8：训练习惯与恢复 — 6题
+  { id: "av70", type: "select", text: "每周下肢专项训练天数？", options: [
+    { label: "0-1天", value: "0-1" }, { label: "2天", value: "2" }, { label: "3天", value: "3" }, { label: "≥4天", value: "ge4" },
+  ], required: true, dimension: "recovery" },
+  { id: "av71", type: "select", text: "平均每次下肢训练时长？", options: [
+    { label: "<30分钟", value: "lt30" }, { label: "30-60分钟", value: "30-60" }, { label: "60-90分钟", value: "60-90" }, { label: ">90分钟", value: "gt90" },
+  ], required: true, dimension: "recovery" },
+  { id: "av73", type: "select", text: "平均每晚睡多少小时？", options: [
+    { label: "<6小时", value: "lt6" }, { label: "6-7小时", value: "6-7" }, { label: "7-9小时", value: "7-9" }, { label: ">9小时", value: "gt9" },
+  ], required: true, dimension: "recovery" },
+  { id: "av74", type: "select", text: "睡眠质量如何？", options: [
+    { label: "很差（常醒难入睡）", value: "very_poor" }, { label: "较差", value: "poor" }, { label: "一般", value: "average" }, { label: "较好", value: "good" }, { label: "很好（精力充沛）", value: "excellent" },
+  ], required: true, dimension: "recovery" },
+  { id: "av77", type: "select", text: "近一个月总体压力水平？", options: [
+    { label: "很低", value: "very_low" }, { label: "较低", value: "low" }, { label: "中等", value: "medium" }, { label: "较高", value: "high" }, { label: "很高", value: "very_high" },
+  ], required: true, dimension: "recovery" },
+  { id: "av79", type: "select", text: "是否定期安排减载周（轻训周）？", options: [
+    { label: "有，每4-6周一次", value: "yes" }, { label: "偶尔但不规律", value: "irregular" }, { label: "从不", value: "never" }, { label: "刚开始训练", value: "new" },
+  ], required: false, dimension: "recovery" },
 
-  // ================================================================
-  // 模块 9：恢复与生活方式 (lifestyle)
-  // ================================================================
-  { id: "st44", type: "select", text: "您每天平均睡眠时长？", options: [{ label: "8小时以上", value: "8+" }, { label: "7-8小时", value: "7-8" }, { label: "6-7小时", value: "6-7" }, { label: "不到6小时", value: "<6" }], required: true, dimension: "lifestyle" },
-  { id: "st45", type: "select", text: "您的睡眠质量？", options: [{ label: "很好（入睡快、醒来精神）", value: "good" }, { label: "一般", value: "average" }, { label: "较差（入睡困难/易醒）", value: "poor" }], required: true, dimension: "lifestyle" },
-  { id: "st46", type: "select", text: "您的饮食营养质量？", options: [{ label: "很注意（蛋白质/碳水/脂肪均衡）", value: "good" }, { label: "一般", value: "average" }, { label: "不太注意", value: "poor" }], required: true, dimension: "lifestyle" },
-  { id: "st47", type: "slider", text: "您的生活压力程度？", sliderRange: { min: 1, max: 10, step: 1 }, sliderLabels: { min: "几乎无压力", max: "压力很大" }, required: true, dimension: "lifestyle" },
-  { id: "st48", type: "select", text: "您是否有主动恢复习惯？", hint: "泡沫轴、拉伸、按摩、冷热交替等", options: [{ label: "经常做（每周3次以上）", value: "frequent" }, { label: "偶尔做", value: "occasional" }, { label: "很少做", value: "rare" }, { label: "从不", value: "never" }], required: true, dimension: "lifestyle" },
+  // 维度 9：心理与动机 — 6题
+  { id: "av80", type: "select", text: "提高弹跳的最主要目标？", options: [
+    { label: "比赛扣篮/盖帽", value: "dunk" }, { label: "达到某个数字", value: "number" }, { label: "享受过程", value: "process" }, { label: "提升整体表现", value: "performance" }, { label: "其他", value: "other" },
+  ], required: true, dimension: "psychology" },
+  { id: "av82", type: "select", text: "是否记录训练数据（深蹲/跳高/增强式）？", options: [
+    { label: "详细记录", value: "detailed" }, { label: "偶尔记录", value: "sometimes" }, { label: "凭感觉不记录", value: "never" },
+  ], required: false, dimension: "psychology" },
+  { id: "av83", type: "select", text: "过去6个月因动力下降中断训练超2周？", options: [
+    { label: "无中断", value: "none" }, { label: "中断1次", value: "1" }, { label: "中断≥2次", value: "ge2" },
+  ], required: false, dimension: "psychology" },
+  { id: "av84", type: "select", text: "跳高几周没进步时通常会？", options: [
+    { label: "更努力加量", value: "push_harder" }, { label: "分析调整", value: "analyze" }, { label: "沮丧减少训练", value: "frustrated" }, { label: "放弃", value: "quit" }, { label: "未遇到", value: "never" },
+  ], required: false, dimension: "psychology" },
+  { id: "av86", type: "select", text: "尝试最大跳跃时对自己说什么？", options: [
+    { label: "'快！爆！跳！'", value: "explosive" }, { label: "'轻一点''控制住'", value: "inhibitory" }, { label: "什么都不想", value: "nothing" }, { label: "过于关注技术细节", value: "overthink" },
+  ], required: false, dimension: "psychology" },
+  { id: "av88", type: "select", text: "如果12周只增加5-8cm，你会？", options: [
+    { label: "接受长期积累", value: "accept" }, { label: "略失望但继续", value: "continue" }, { label: "很失望想换方法", value: "disappointed" }, { label: "无法接受", value: "unacceptable" },
+  ], required: false, dimension: "psychology" },
 
-  // ================================================================
-  // 模块 10：训练资源与目标 (availability)
-  // ================================================================
-  { id: "st49", type: "select", text: "您每周能用于训练的天数？", options: [{ label: "5-7天", value: "5-7" }, { label: "3-4天", value: "3-4" }, { label: "1-2天", value: "1-2" }], required: true, dimension: "availability" },
-  { id: "st50", type: "select", text: "您每次训练可用时长？", options: [{ label: "90分钟以上", value: "90+" }, { label: "60-90分钟", value: "60-90" }, { label: "30-60分钟", value: "30-60" }, { label: "<30分钟", value: "<30" }], required: true, dimension: "availability" },
-  { id: "st51", type: "select", text: "您可以使用的训练设备？", options: [{ label: "完整健身房（杠铃/哑铃/龙门架）", value: "full_gym" }, { label: "基础器械（哑铃/弹力带）", value: "basic" }, { label: "几乎无设备（自重训练）", value: "bodyweight" }], required: true, dimension: "availability" },
-  { id: "st52", type: "select", text: "您的弹跳提升目标？", options: [{ label: "提升 5-10cm", value: "5-10" }, { label: "提升 10-20cm", value: "10-20" }, { label: "提升 20cm 以上", value: "20+" }, { label: "维持现有水平", value: "maintain" }], required: true, dimension: "availability" },
-  { id: "st53", type: "select", text: "您的主要运动项目？", options: [{ label: "篮球", value: "basketball" }, { label: "排球", value: "volleyball" }, { label: "足球", value: "football" }, { label: "田径（跳高/跳远/短跑）", value: "track" }, { label: "健身/综合", value: "fitness" }, { label: "其他", value: "other" }], required: true, dimension: "availability" },
-  { id: "st54", type: "select", text: "您是否熟悉举重类动作（高翻、抓举、挺举等）？", hint: "不熟悉的话AI会推荐效果相近的替代动作，不用勉强", options: [{ label: "非常熟悉，能标准完成", value: "proficient" }, { label: "略懂，动作还不够标准", value: "novice" }, { label: "完全不会/没接触过", value: "never" }], required: true, dimension: "trainingHx" },
+  // 维度 10：跳跃技术 — 6题
+  { id: "av90", type: "select", text: "最大垂直跳时起跳前下蹲深度？", options: [
+    { label: "很浅（<30度）", value: "shallow" }, { label: "中等（45-60度）", value: "medium" }, { label: "较深（70-90度）", value: "deep" }, { label: "很深（>90度）", value: "very_deep" },
+  ], required: false, dimension: "technique" },
+  { id: "av91", type: "select", text: "跳跃时手臂摆动幅度？", options: [
+    { label: "充分摆臂同步", value: "full" }, { label: "有摆臂但幅度小/不同步", value: "partial" }, { label: "几乎不摆臂", value: "none" },
+  ], required: false, dimension: "technique" },
+  { id: "av93", type: "select", text: "跳起落地时膝盖通常？", options: [
+    { label: "屈膝充分，轻盈", value: "soft" }, { label: "有弯曲但声大", value: "moderate" }, { label: "直腿硬着陆", value: "stiff" }, { label: "膝盖内扣", value: "valgus" },
+  ], required: false, dimension: "technique" },
+  { id: "av94", type: "select", text: "跑动起跳的助跑→起跳转换是否流畅？", options: [
+    { label: "非常流畅", value: "smooth" }, { label: "偶尔停顿", value: "sometimes" }, { label: "不流畅有减速", value: "choppy" }, { label: "未做过", value: "never" },
+  ], required: false, dimension: "technique" },
+  { id: "av95", type: "select", text: "单腿跳起跳瞬间膝盖稳定吗？", options: [
+    { label: "稳定", value: "stable" }, { label: "偶尔晃动", value: "slight" }, { label: "经常内扣或不稳", value: "unstable" }, { label: "未做过", value: "never" },
+  ], required: false, dimension: "technique" },
+  { id: "av97", type: "number", text: "综合跳跃技术自评（1=差，10=完美）？", numberRange: { min: 1, max: 10 }, required: false, dimension: "technique" },
 ];
 
 export function getStandardQuestionById(id: string): Question | undefined {
-  return standardQuestions.find(q => q.id === id);
+  return standardQuestions.find((q) => q.id === id);
 }

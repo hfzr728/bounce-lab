@@ -69,7 +69,7 @@ export function QuestionnaireProvider({ children, totalQuestionCount, totalStepC
   totalQuestionCount: number;
   totalStepCount: number;
 }) {
-  // 三版本用不同的存储 key：体测版(5步)、国际标准版(7步)、专业版(9步)
+  // 三版本用不同的存储 key：体测版(5步)、国际标准版(7步)、专业版(10步)
   const storageKey = totalStepCount <= 5 ? "bounce-questionnaire-basic" : totalStepCount <= 7 ? "bounce-questionnaire-standard" : "bounce-questionnaire";
   const [state, dispatch] = useReducer(reducer, initialState);
   const [hydrated, setHydrated] = React.useState(false);

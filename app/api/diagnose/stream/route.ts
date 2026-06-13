@@ -1,10 +1,12 @@
 // POST /api/diagnose/stream — SSE 流式诊断：先返回规则引擎结果，再流式推送 AI 分析
 // ============================================================
 
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { runDiagnosis, assessInjuryRisk } from "@/lib/diagnosis/rule-engine";
 import { callDeepSeekStream } from "@/lib/ai/deepseek";
 import { DIAGNOSIS_SYSTEM_PROMPT, buildDiagnosisUserPrompt } from "@/lib/ai/prompts";
+import { sanitizeAIResponse } from "@/lib/ai/sanitize";
+import { RATE_LIMITS, checkRateLimitOnly } from "@/lib/api/rate-limit";
 import { allQuestions } from "@/lib/questionnaire/questions";
 import { basicQuestions } from "@/lib/questionnaire/basic-questions";
 import { standardQuestions } from "@/lib/questionnaire/standard-questions";
@@ -14,6 +16,12 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
+  // 限流检查
+  const rl = checkRateLimitOnly(request, RATE_LIMITS.DIAGNOSIS);
+  if (!rl.allowed) {
+    return NextResponse.json({ error: `请求过于频繁，请 ${Math.ceil((rl.reset * 1000 - Date.now()) / 1000)} 秒后重试` }, { status: 429, headers: { "Retry-After": String(Math.ceil((rl.reset * 1000 - Date.now()) / 1000)) } });
+  }
+
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
@@ -75,9 +83,9 @@ export async function POST(request: NextRequest) {
           : "";
         const systemPromptWithKB = DIAGNOSIS_SYSTEM_PROMPT + kbContext;
 
-        // 4. 流式推送 AI 分析
+        // 4. 流式推送 AI 分析（每 chunk 经过 XSS 清洗）
         for await (const chunk of callDeepSeekStream(systemPromptWithKB, userPrompt)) {
-          send("ai", { text: chunk });
+          send("ai", { text: sanitizeAIResponse(chunk) });
         }
 
         // 5. 完成

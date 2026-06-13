@@ -14,9 +14,9 @@ export function Header() {
         <nav className="flex items-center gap-0 md:gap-5 text-xs md:text-sm font-medium flex-wrap">
           {[
             ["首页", "/"], ["评估", "/assessment"], ["生成计划", "/plan"],
-            ["训练计划", "/program-builder"], ["追踪", "/jump-tracker"],
-            ["动作库", "/exercises"], ["百科", "/qa"], ["康复", "/rehab"],
-            ["饮食", "/body-comp"], ["主页", "/profile"],
+            ["训练记录", "/program-builder"], ["进步追踪", "/jump-tracker"],
+            ["动作库", "/exercises"], ["弹跳百科", "/qa"], ["康复", "/rehab"],
+            ["饮食建议", "/body-comp"], ["主页", "/profile"],
           ].map(([label, href]) => (
             <a key={href} href={href}
               className="text-slate-400 hover:text-[#00F5FF] transition-colors px-2 py-1 text-[11px] md:text-sm tracking-wide">

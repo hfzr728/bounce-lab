@@ -3,9 +3,9 @@
 // 问卷步骤页 — 动态路由 /assessment/step/[step]
 // ============================================================
 
-// 为静态托管预渲染所有 9 个步骤的 HTML
+// 为静态托管预渲染所有步骤的 HTML
 export function generateStaticParams() {
-  return Array.from({ length: 9 }, (_, i) => ({ step: String(i + 1) }));
+  return Array.from({ length: 10 }, (_, i) => ({ step: String(i + 1) }));
 }
 
 import { useParams, useRouter } from "next/navigation";
@@ -15,7 +15,8 @@ import { ProgressBar } from "@/components/questionnaire/progress-bar";
 import { QuestionCard } from "@/components/questionnaire/question-card";
 import { StepNavigator } from "@/components/questionnaire/step-navigator";
 import { getStep, totalSteps, totalQuestions } from "@/lib/questionnaire/steps";
-import { getQuestionById } from "@/lib/questionnaire/questions";
+import { getQuestionById, allQuestions } from "@/lib/questionnaire/questions";
+import { validateAllAnswers } from "@/lib/questionnaire/validation";
 
 function StepContent() {
   const params = useParams();
@@ -47,6 +48,15 @@ function StepContent() {
   const isLastStep = stepParam === totalSteps;
 
   const handleSubmit = async () => {
+    // 提交前最终校验：所有必填项 + 数字范围
+    const allIds = allQuestions.map(q => q.id);
+    const errors = validateAllAnswers(allIds, getQuestionById, state.answers);
+    if (errors.length > 0) {
+      const msg = errors.slice(0, 5).map(e => e.message).join("\n");
+      alert(`请修正以下问题后再提交：\n\n${msg}${errors.length > 5 ? `\n...还有 ${errors.length - 5} 个问题` : ""}`);
+      return;
+    }
+
     dispatch({ type: "SET_SUBMITTING", value: true });
     try {
       const response = await fetch("/api/diagnose", {

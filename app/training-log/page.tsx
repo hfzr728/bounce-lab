@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 
 const LOG_KEY = "bounce-training-log";
 const PLAN_START_KEY = "bounce-plan-start-week";
@@ -137,6 +138,28 @@ export default function TrainingLogPage() {
           <span className="text-xs text-amber-400 ml-auto">📍 当前为计划第 {planWeekNum} 周</span>
         )}
       </div>
+
+      {/* 空状态引导 */}
+      {logs.length === 0 && (
+        <div className="bg-[#1e293b] border border-slate-700/50 rounded-2xl p-8 mb-6 text-center">
+          <div className="text-5xl mb-4">💪</div>
+          <h3 className="text-lg font-bold text-white mb-2">还没有训练记录</h3>
+          <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">
+            完成任意训练计划后，点击日历中的日期进行打卡。
+            <br />
+            系统会自动追踪你的训练频率、类型和时长。
+          </p>
+          <div className="mt-5 flex justify-center gap-3 flex-wrap">
+            <Link href="/assessment" className="px-4 py-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-xl text-sm hover:bg-amber-500/20 transition-all">
+              🔬 开始评估 →
+            </Link>
+            <Link href="/plan" className="px-4 py-2 bg-slate-700/50 border border-slate-600/30 text-slate-300 rounded-xl text-sm hover:bg-slate-700 transition-all">
+              📋 查看训练计划 →
+            </Link>
+          </div>
+          <p className="text-[10px] text-slate-600 mt-4">小提示：在「训练计划」页设置起始周后，日历会自动标注当前是第几周</p>
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* 日历 */}

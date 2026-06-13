@@ -1,9 +1,9 @@
 "use client";
 // 基础版问卷步骤页
 
-// 为静态托管预渲染所有 5 个步骤的 HTML
+// 为静态托管预渲染所有 10 个步骤的 HTML
 export function generateStaticParams() {
-  return Array.from({ length: 5 }, (_, i) => ({ step: String(i + 1) }));
+  return Array.from({ length: 10 }, (_, i) => ({ step: String(i + 1) }));
 }
 
 import { useParams, useRouter } from "next/navigation";
@@ -13,7 +13,8 @@ import { ProgressBar } from "@/components/questionnaire/progress-bar";
 import { QuestionCard } from "@/components/questionnaire/question-card";
 import { StepNavigator } from "@/components/questionnaire/step-navigator";
 import { getBasicStep, basicTotalSteps, basicTotalQuestions } from "@/lib/questionnaire/basic-steps";
-import { getBasicQuestionById } from "@/lib/questionnaire/basic-questions";
+import { getBasicQuestionById, basicQuestions } from "@/lib/questionnaire/basic-questions";
+import { validateAllAnswers } from "@/lib/questionnaire/validation";
 
 function BasicStepContent() {
   const params = useParams();
@@ -39,6 +40,15 @@ function BasicStepContent() {
   const isLastStep = stepParam === basicTotalSteps;
 
   const handleSubmit = async () => {
+    // 提交前最终校验：所有必填项 + 数字范围
+    const allIds = basicQuestions.map(q => q.id);
+    const errors = validateAllAnswers(allIds, getBasicQuestionById, state.answers);
+    if (errors.length > 0) {
+      const msg = errors.slice(0, 5).map(e => e.message).join("\n");
+      alert(`请修正以下问题后再提交：\n\n${msg}${errors.length > 5 ? `\n...还有 ${errors.length - 5} 个问题` : ""}`);
+      return;
+    }
+
     dispatch({ type: "SET_SUBMITTING", value: true });
     try {
       const response = await fetch("/api/diagnose", {

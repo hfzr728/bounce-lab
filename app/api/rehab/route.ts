@@ -3,6 +3,8 @@
 // ============================================================
 import { NextRequest } from "next/server";
 import { searchKnowledgeBase } from "@/lib/knowledge-base";
+import { sanitizeAIResponse } from "@/lib/ai/sanitize";
+import { RATE_LIMITS, checkRateLimitOnly } from "@/lib/api/rate-limit";
 
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || "";
 const DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1";
@@ -29,6 +31,12 @@ const STAGE_NAMES: Record<string, string> = {
 };
 
 export async function POST(request: NextRequest) {
+  // 限流检查
+  const rl = checkRateLimitOnly(request, RATE_LIMITS.AI_GENERATE);
+  if (!rl.allowed) {
+    return Response.json({ error: `请求过于频繁，请 ${Math.ceil((rl.reset * 1000 - Date.now()) / 1000)} 秒后重试` }, { status: 429, headers: { "Retry-After": String(Math.ceil((rl.reset * 1000 - Date.now()) / 1000)) } });
+  }
+
   const { injuries: injArr, stage, details } = await request.json();
   
   // Support both old single "injury" and new "injuries" array
@@ -130,7 +138,7 @@ ${knowledgeContext ? `参考知识（包含训练原理、动作参数、决策�
                 const parsed = JSON.parse(dataStr);
                 const delta = parsed.choices?.[0]?.delta?.content;
                 if (delta) {
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: delta })}\n\n`));
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: sanitizeAIResponse(delta) })}\n\n`));
                 }
               } catch {}
             }

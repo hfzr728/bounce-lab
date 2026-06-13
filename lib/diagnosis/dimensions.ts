@@ -6,9 +6,11 @@
 import { DimensionKey } from "@/lib/questionnaire/types";
 
 export const DIMENSION_WEIGHTS: Record<DimensionKey, number> = {
-  anthropometry: 0.05, proportion: 0.05, maxStrength: 0.20,
-  powerSpeed: 0.25, mobility: 0.12, endurance: 0.08,
-  trainingHx: 0.08, lifestyle: 0.12, availability: 0.05,
+  anthropometry: 0.05, proportion: 0.03, maxStrength: 0.18,
+  powerSpeed: 0.22, mobility: 0.08, endurance: 0.04,
+  glute: 0.10, injury: 0.08,
+  recovery: 0.07, psychology: 0.05, technique: 0.05,
+  trainingHx: 0.03, lifestyle: 0.02, availability: 0.00,
 };
 
 export const DIMENSION_DESCRIPTIONS: Record<DimensionKey, string> = {
@@ -18,9 +20,14 @@ export const DIMENSION_DESCRIPTIONS: Record<DimensionKey, string> = {
   powerSpeed: "爆发力与速度——弹跳核心。RFD、SSC效率、力-速曲线决定跳跃上限",
   mobility: "柔韧与活动度——关节活动范围决定动作质量。受限活动度=受限跳跃力学",
   endurance: "能量系统——有氧基础和无氧耐力决定训练容量和恢复速度",
-  trainingHx: "训练经验与伤病——反映适应性和安全边界",
-  lifestyle: "恢复与生活方式——睡眠、营养、压力管理决定训练效果转化率",
-  availability: "训练资源与目标——时间、设备和意愿决定计划可行性",
+  glute: "臀肌功能——臀肌是跳跃的核心引擎。臀肌抑制或无力将严重限制弹跳上限",
+  injury: "伤病历史与风险管理——安全是一切训练的前提。伤病历史决定训练负荷边界",
+  recovery: "恢复与生活习惯——睡眠、营养、压力管理决定训练效果转化率",
+  psychology: "心理素质——动机、目标设定、挫折耐受力决定长期坚持能力",
+  technique: "技术评估——跳跃技术质量直接影响力量转化效率和受伤风险",
+  trainingHx: "训练经验（旧）",
+  lifestyle: "生活方式（旧）",
+  availability: "训练资源（旧）",
 };
 
 export const CMJ_NORMS_MALE = [

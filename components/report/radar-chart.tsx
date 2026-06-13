@@ -63,10 +63,10 @@ export function RadarChart({ dimensionScores }: RadarChartProps) {
         ticks: {
           stepSize: 20,
           backdropColor: "transparent",
-          font: { size: 10 },
+          font: { size: 8 },
         },
         pointLabels: {
-          font: { size: 13, weight: "bold" as const },
+          font: { size: 11, weight: "bold" as const },
           color: "#374151",
         },
         grid: {
@@ -78,19 +78,20 @@ export function RadarChart({ dimensionScores }: RadarChartProps) {
       legend: {
         position: "bottom" as const,
         labels: {
-          padding: 20,
+          padding: 16,
           usePointStyle: true,
+          font: { size: 11 },
         },
       },
     },
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6">
+    <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
         能力维度雷达图
       </h3>
-      <div className="max-w-md mx-auto">
+      <div className="w-full max-w-md mx-auto">
         <Radar data={data} options={options} />
       </div>
     </div>

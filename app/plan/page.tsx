@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useUser } from "@/lib/user/context";
 
@@ -37,6 +37,7 @@ export default function PlanGenerationPage() {
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const planRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   // Current diagnosis selection
   const [selectedDiag, setSelectedDiag] = useState<DiagnosisData | null>(null);
@@ -112,11 +113,17 @@ export default function PlanGenerationPage() {
 
   const selectDiagnosis = (diag: SavedDiagnosis) => selectDiagInternal(diag);
 
-  const handleGenerate = async () => {
+  const handleGenerate = useCallback(async () => {
     if (!selectedDiag || loading) return;
+
+    // 取消前一次请求
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true); setError(""); setPlanText(""); setSaved(false);
     try {
-      const response = await fetch("/api/plan", {
+      const response = await fetch("/api/plan/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -125,19 +132,58 @@ export default function PlanGenerationPage() {
           injuryRisk: selectedDiag.injuryRisk || { level: "未评估", factors: [] },
           diagnosisSummary: selectedDiag.diagnosisSummary || "综合诊断已完成",
         }),
+        signal: controller.signal,
       });
-      if (!response.ok) { const err = await response.json(); setError(err.error || "生成失败"); setLoading(false); return; }
-      const data = await response.json();
-      setPlanText(data.aiGenerated || "");
-      if (data.aiGenerated) {
-        const savedPlan = { type: "plan", date: new Date().toISOString(), version: selectedDiag.version || "unknown", summary: data.aiGenerated.slice(0, 120) + "...", planText: data.aiGenerated, weaknesses: selectedDiag.weaknesses };
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: "生成失败" }));
+        setError(err.error || `请求失败 (${response.status})`);
+        setLoading(false);
+        return;
+      }
+
+      // SSE 流式读取
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("无法读取流");
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let accumulated = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const raw = line.slice(6);
+          try {
+            const data = JSON.parse(raw);
+            if (data.text) {
+              accumulated += data.text;
+              setPlanText(accumulated);
+            }
+          } catch { /* skip */ }
+        }
+      }
+
+      // 保存
+      if (accumulated) {
+        const savedPlan = { type: "plan", date: new Date().toISOString(), version: selectedDiag.version || "unknown", summary: accumulated.slice(0, 120) + "...", planText: accumulated, weaknesses: selectedDiag.weaknesses };
         localStorage.setItem("bounce-saved-p-" + Date.now(), JSON.stringify(savedPlan));
         setSaved(true);
       }
-    } catch (err: any) { setError(err.message); }
+    } catch (err: any) {
+      if (err.name === "AbortError") return; // 被取消的请求不算错误
+      setError(err.message || "网络异常");
+    }
     setLoading(false);
     setTimeout(() => planRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-  };
+  }, [selectedDiag, loading]);
 
   // Parse AI plan text into week/day entries
   const parsePlanForImport = () => {
@@ -352,25 +398,36 @@ export default function PlanGenerationPage() {
           )}
 
           {/* 生成按钮 */}
-          {selectedDiag && !loading && (
+          {selectedDiag && (
             <div className="text-center mb-10">
-              <button onClick={handleGenerate} className="px-10 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-[#0a0a14] font-extrabold rounded-xl text-lg transition-all shadow-lg shadow-amber-500/25">
-                生成12周训练计划 →
+              <button
+                onClick={handleGenerate}
+                disabled={loading}
+                className={`px-10 py-4 rounded-xl text-lg font-extrabold transition-all shadow-lg ${
+                  loading
+                    ? "bg-amber-500/50 text-[#0a0a14]/50 cursor-wait"
+                    : "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-[#0a0a14] shadow-amber-500/25"
+                }`}
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    AI 正在生成训练方案...
+                  </span>
+                ) : (
+                  "生成12周训练计划 →"
+                )}
               </button>
-              <p className="text-xs text-slate-600 mt-3">AI 生成需要一些时间，请耐心等待</p>
+              {!loading && <p className="text-xs text-slate-600 mt-3">AI 生成需要约 30-60 秒，请耐心等待</p>}
             </div>
           )}
         </>
       )}
 
       {error && <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-6 text-red-400 text-sm text-center">{error}</div>}
-
-      {loading && (
-        <div className="text-center py-10">
-          <div className="flex justify-center gap-2 mb-4">{[...Array(5)].map((_, i) => <div key={i} className="w-3 h-3 rounded-full bg-amber-500 animate-pulse" style={{ animationDelay: `${i * 150}ms` }} />)}</div>
-          <p className="text-amber-400 text-sm">AI正在分析你的数据，生成个性化训练方案，请耐心等待...</p>
-        </div>
-      )}
 
       {/* 生成的计划 */}
       {planText && selectedDiag && (
@@ -381,7 +438,9 @@ export default function PlanGenerationPage() {
           </div>
           <div className="text-sm leading-relaxed text-slate-300 whitespace-pre-wrap">{planText}</div>
           <div className="mt-6 pt-4 border-t border-slate-700/50 flex flex-wrap gap-3">
-            <button onClick={handleGenerate} disabled={loading} className="px-4 py-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-xl text-sm hover:bg-amber-500/20 transition-all disabled:opacity-50">重新生成</button>
+            <button onClick={handleGenerate} disabled={loading} className="px-4 py-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-xl text-sm hover:bg-amber-500/20 transition-all disabled:opacity-50 disabled:cursor-wait">
+              {loading ? "🔄 生成中..." : "重新生成"}
+            </button>
             <button onClick={parsePlanForImport} className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl text-sm hover:bg-emerald-500/20 transition-all">📅 导入到训练日历</button>
             <Link href="/program-builder" className="px-4 py-2 bg-slate-700/50 hover:bg-slate-700 text-slate-300 rounded-xl text-sm transition-all">去训练组装器手动调整</Link>
           </div>

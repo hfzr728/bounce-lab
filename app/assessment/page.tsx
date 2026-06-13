@@ -35,8 +35,8 @@ export default function AssessmentLandingPage() {
       return null;
     };
     setSavedProgress(
-      check("bounce-questionnaire-basic", "basic", "体测版") ||
-      check("bounce-questionnaire-standard", "standard", "国际标准版") ||
+      check("bounce-questionnaire-basic", "basic", "基础版") ||
+      check("bounce-questionnaire-standard", "standard", "进阶版") ||
       check("bounce-questionnaire", "advanced", "专业版")
     );
   }, [isLoggedIn]);
@@ -65,22 +65,22 @@ export default function AssessmentLandingPage() {
 
   const versions: { key: Version; icon: string; title: string; desc: string; time: string; questions: string; features: string[]; tag: string; tagColor: string; level: string; levelDesc: string }[] = [
     {
-      key: "basic", icon: "🏃", title: "体测版", desc: "用大学体测数据 + 简单自评", time: "约 5 分钟", questions: "34 题",
-      features: ["50米跑 / 立定跳远 / 坐位体前屈", "引体向上 / 耐力跑等体测数据", "力量/柔韧/爆发力自评", "适合普通运动爱好者"],
+      key: "basic", icon: "🏃", title: "基础版", desc: "无需测量，凭感觉回答", time: "约 5 分钟", questions: "32 题",
+      features: ["10 个维度快速自评", "无需任何测量或测试", "年龄段/体型/运动频率等基础信息", "适合刚入门的新手"],
       tag: "快速入门", tagColor: "bg-green-500/10 text-green-400 border-green-500/20",
-      level: "初级", levelDesc: "适合刚开始接触训练或没有专业测试设备的用户，训练强度适中偏保守",
+      level: "初级", levelDesc: "适合刚开始接触训练、不了解自身数据的用户，训练建议偏保守",
     },
     {
-      key: "standard", icon: "📐", title: "国际标准版", desc: "基于 NSCA/FMS/YBT 国际标准", time: "约 10 分钟", questions: "53 题",
-      features: ["FMS 7项功能性运动筛查（无需设备）", "CMJ弹跳（手机App即可测量）", "NSCA相对力量标准评估", "无需测力台，无需专业设备"],
+      key: "standard", icon: "📐", title: "进阶版", desc: "少量简单测量 + 自测动作", time: "约 8-10 分钟", questions: "59 题",
+      features: ["身高/体重/垂直跳等简单测量", "深蹲力量估算 + 单腿深蹲自测", "灵活性/臀肌/伤病等 10 维度评估", "适合有训练基础的运动者"],
       tag: "推荐", tagColor: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-      level: "中级", levelDesc: "适合有1年以上训练基础、了解基本力量训练动作的用户，训练强度适中",
+      level: "中级", levelDesc: "适合有训练基础、想获得专业诊断但不便做复杂测试的用户",
     },
     {
-      key: "advanced", icon: "🔬", title: "专业版", desc: "最全面的运动科学评估", time: "约 15 分钟", questions: "85 题",
-      features: ["含力-速曲线（F-V Profile）分析", "CMJ/SJ/深跳等完整爆发力指标", "12项伤病筛查 + 离心力量评估", "适合有训练基础的深度用户"],
+      key: "advanced", icon: "🔬", title: "专业版", desc: "最全面的运动科学评估", time: "约 15-20 分钟", questions: "97 题",
+      features: ["含 1RM/跳深/触地时间等专业测试", "F-V Profile 力速曲线分析", "12 项伤病筛查 + 离心力量评估", "适合追求极致诊断的深度用户"],
       tag: "深度评估", tagColor: "bg-violet-500/10 text-violet-400 border-violet-500/20",
-      level: "高级", levelDesc: "适合有3年以上系统训练经验、熟悉杠铃和增强式训练的用户，训练强度较高",
+      level: "高级", levelDesc: "适合有系统训练经验、熟悉杠铃和增强式训练的用户，训练强度较高",
     },
   ];
 
@@ -88,7 +88,7 @@ export default function AssessmentLandingPage() {
     <div className="max-w-4xl mx-auto px-4 py-16">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-extrabold text-white mb-4">🔬 弹跳短板测评</h1>
-        <p className="text-lg text-gray-400 max-w-xl mx-auto">三种评估深度，从快速自测到专业诊断，选择最适合你的版本</p>
+        <p className="text-lg text-gray-400 max-w-xl mx-auto">三种深度，从快速自评到专业诊断，选择最适合你的版本</p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-5 mb-10">

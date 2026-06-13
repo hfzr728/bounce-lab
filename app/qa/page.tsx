@@ -81,11 +81,14 @@ export default function QAPage() {
     // 添加 AI 占位消息
     setMessages(prev => [...prev, { role: "assistant", content: "" }]);
 
+    const controller = new AbortController();
+
     try {
       const response = await fetch("/api/qa", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: q }),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -124,6 +127,7 @@ export default function QAPage() {
         }
       }
     } catch (err: any) {
+      if (err.name === "AbortError") return;
       setMessages(prev => {
         const copy = [...prev];
         copy[copy.length - 1] = { role: "assistant", content: `❌ 请求失败：${err.message}` };

@@ -8,18 +8,16 @@ export default function HomePage() {
       <section className="relative overflow-hidden py-24 md:py-36">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0A] via-[#0A0A0A] to-transparent z-10 pointer-events-none" />
         <div className="relative z-20 max-w-7xl mx-auto px-4 text-center">
-          <p className="font-display text-sm tracking-[0.3em] text-[#00F5FF] mb-6 animate-fade-in-up">
-            EXPLOSIVE TRAINING PLATFORM
+          <p className="font-display text-sm tracking-[0.3em] text-[#00F5FF]/80 mb-6 animate-fade-in-up">
+            PROFESSIONAL · EXPLOSIVE · PRECISE
           </p>
-          <h1 className="font-display text-5xl md:text-7xl lg:text-8xl leading-[0.9] mb-8 animate-fade-in-up">
-            <span className="text-white">PRECISE</span>
+          <h1 className="font-display-cn text-5xl md:text-7xl lg:text-8xl leading-[1.05] mb-8 animate-fade-in-up">
+            <span className="bg-gradient-to-r from-white via-[#E0F0FF] to-[#00F5FF] bg-clip-text text-transparent">
+              精准评估
+            </span>
             <br />
-            <span className="text-[#00F5FF]">ASSESSMENT,</span>
-            <br />
-            <span className="text-white">EXPLOSIVE</span>
-            <br />
-            <span className="bg-gradient-to-r from-[#00F5FF] to-[#FFD700] bg-clip-text text-transparent">
-              TRAINING
+            <span className="bg-gradient-to-r from-[#00F5FF] via-[#FFD700] to-[#FF6B35] bg-clip-text text-transparent">
+              爆发训练
             </span>
           </h1>
           <p className="text-base md:text-lg text-slate-400 max-w-xl mx-auto mb-10 animate-fade-in-up animate-delay-1">
@@ -30,12 +28,12 @@ export default function HomePage() {
             <Link href="/assessment"
               className="btn-skew bg-[#00F5FF] text-[#0A0A0A] text-sm"
             >
-              START ASSESSMENT →
+              开始评估 →
             </Link>
             <Link href="/plan"
               className="btn-skew bg-transparent border border-white/20 text-white hover:border-[#00F5FF]/50 text-sm"
             >
-              AI PLAN GENERATOR
+              AI 生成计划
             </Link>
           </div>
         </div>
@@ -47,7 +45,7 @@ export default function HomePage() {
           {[
             { value: "65+", label: "专业动作", icon: "🏋️" },
             { value: "12", label: "周训练周期", icon: "🧠" },
-            { value: "11", label: "评估维度", icon: "📐" },
+            { value: "10", label: "评估维度", icon: "📐" },
             { value: "9", label: "功能模块", icon: "🎯" },
           ].map((stat) => (
             <div key={stat.label} className="glass-card p-6 text-center">
@@ -62,8 +60,10 @@ export default function HomePage() {
       {/* ============ 功能模块 ============ */}
       <section className="max-w-7xl mx-auto px-4 py-20">
         <div className="mb-14 text-center">
-          <p className="font-display text-xs tracking-[0.25em] text-[#00F5FF] mb-3">FEATURES</p>
-          <h2 className="font-display text-4xl md:text-5xl text-white mb-4">ALL SYSTEMS</h2>
+          <p className="font-display text-xs tracking-[0.25em] text-[#00F5FF] mb-3">功能模块</p>
+          <h2 className="font-display-cn text-4xl md:text-5xl text-white mb-4">
+            <span className="bg-gradient-to-r from-[#00F5FF] to-white bg-clip-text text-transparent">全部功能</span>
+          </h2>
           <p className="text-slate-500 text-sm max-w-lg mx-auto">从评估诊断到训练执行，覆盖弹跳训练全流程</p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -105,8 +105,10 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#00F5FF]/3 via-transparent to-[#FF3B3B]/3 opacity-30" />
         <div className="relative max-w-7xl mx-auto px-4">
           <div className="mb-14 text-center">
-            <p className="font-display text-xs tracking-[0.25em] text-[#00F5FF] mb-3">PROCESS</p>
-            <h2 className="font-display text-4xl md:text-5xl text-white mb-4">4 STEPS TO VERT</h2>
+            <p className="font-display text-xs tracking-[0.25em] text-[#00F5FF] mb-3">训练流程</p>
+            <h2 className="font-display-cn text-4xl md:text-5xl text-white mb-4">
+              <span className="bg-gradient-to-r from-[#FFD700] to-[#00F5FF] bg-clip-text text-transparent">四步提升弹跳</span>
+            </h2>
             <p className="text-slate-500 text-sm">科学的训练流程，让每一步都有据可依</p>
           </div>
           <div className="grid md:grid-cols-4 gap-6">
@@ -132,8 +134,8 @@ export default function HomePage() {
       {/* ============ CTA ============ */}
       <section className="max-w-7xl mx-auto px-4 py-20 text-center">
         <div className="glass-card p-12 md:p-16 glow-border">
-          <h2 className="font-display text-3xl md:text-5xl text-white mb-4 tracking-wide">
-            READY TO <span className="text-[#00F5FF]">EXPLODE</span>?
+          <h2 className="font-display-cn text-3xl md:text-5xl text-white mb-4 tracking-wide">
+            准备好<span className="text-[#FF3B3B]">爆发</span>了吗？
           </h2>
           <p className="text-slate-500 mb-8 max-w-xl mx-auto text-sm">
             注册即可免费使用全部功能。评估数据与训练计划仅保存在你的浏览器本地。
@@ -141,7 +143,7 @@ export default function HomePage() {
           <Link href="/assessment"
             className="btn-skew bg-[#00F5FF] text-[#0A0A0A] text-sm inline-flex"
           >
-            START NOW →
+            立即开始 →
           </Link>
         </div>
       </section>

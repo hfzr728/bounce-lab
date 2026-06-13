@@ -96,11 +96,14 @@ export default function RehabPage() {
     setLoading(true);
     setPlan("");
 
+    const controller = new AbortController();
+
     try {
       const response = await fetch("/api/rehab", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ injuries, stage, details }),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -129,6 +132,7 @@ export default function RehabPage() {
         }
       }
     } catch (err: any) {
+      if (err.name === "AbortError") return;
       setPlan(`❌ 请求失败：${err.message}`);
     }
     setLoading(false);

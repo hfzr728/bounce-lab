@@ -6,6 +6,8 @@
 
 import { Question } from "@/lib/questionnaire/types";
 import { useQuestionnaire } from "./questionnaire-context";
+import { validateAnswer } from "@/lib/questionnaire/validation";
+import { useState, useCallback } from "react";
 
 interface QuestionCardProps {
   question: Question;
@@ -14,62 +16,100 @@ interface QuestionCardProps {
 export function QuestionCard({ question }: QuestionCardProps) {
   const { state, setAnswer } = useQuestionnaire();
   const currentValue = state.answers[question.id];
+  const [error, setError] = useState<string | null>(null);
+
+  const handleChange = useCallback((value: string | number | string[]) => {
+    setAnswer(question.id, value);
+    // 实时校验
+    const err = validateAnswer(question, value);
+    setError(err?.message ?? null);
+  }, [question, setAnswer]);
 
   const renderInput = () => {
     switch (question.type) {
       case "number":
         return (
-          <div className="flex items-center gap-3">
-            <input
-              type="number"
-              min={question.numberRange?.min}
-              max={question.numberRange?.max}
-              value={currentValue ?? ""}
-              onChange={(e) => setAnswer(question.id, e.target.value ? Number(e.target.value) : "")}
-              onWheel={(e) => (e.target as HTMLInputElement).blur()}
-              className="w-32 px-4 py-3 bg-[#0f172a] border border-[#334155] rounded-lg focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 focus:outline-none text-lg text-center text-slate-100 placeholder-slate-500"
-              placeholder="输入"
-            />
-            {question.unit && (
-              <span className="text-gray-400 text-lg">{question.unit}</span>
+          <div>
+            <div className="flex items-center gap-3">
+              <input
+                type="number"
+                min={question.numberRange?.min}
+                max={question.numberRange?.max}
+                required={question.required}
+                value={currentValue ?? ""}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  // 允许清空输入框（用户可能想重新输入）
+                  if (raw === "") {
+                    handleChange("");
+                    return;
+                  }
+                  const num = Number(raw);
+                  // 忽略非数字输入（如 "12abc" → NaN）
+                  if (isNaN(num)) return;
+                  handleChange(num);
+                }}
+                onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                className={`w-32 px-4 py-3 bg-[#0f172a] border rounded-lg focus:ring-1 focus:outline-none text-lg text-center text-slate-100 placeholder-slate-500 transition-colors ${
+                  error
+                    ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
+                    : "border-[#334155] focus:border-amber-500 focus:ring-amber-500/30"
+                }`}
+                placeholder="输入"
+              />
+              {question.unit && (
+                <span className="text-gray-400 text-lg">{question.unit}</span>
+              )}
+            </div>
+            {error && (
+              <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
+                <span>⚠️</span> {error}
+              </p>
             )}
           </div>
         );
 
       case "select":
         return (
-          <div className="grid gap-2">
-            {question.options?.map((opt) => (
-              <label
-                key={opt.value}
-                className={`flex items-center p-4 rounded-xl border cursor-pointer transition-all ${
-                  currentValue === opt.value
-                    ? "border-amber-500/60 bg-amber-500/10 shadow-md"
-                    : "border-[#334155] hover:border-slate-400 hover:bg-[#1a2538]"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name={question.id}
-                  value={opt.value}
-                  checked={currentValue === opt.value}
-                  onChange={() => setAnswer(question.id, opt.value)}
-                  className="hidden"
-                />
-                <div
-                  className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center flex-shrink-0 ${
+          <div>
+            <div className="grid gap-2">
+              {question.options?.map((opt) => (
+                <label
+                  key={opt.value}
+                  className={`flex items-center p-4 rounded-xl border cursor-pointer transition-all ${
                     currentValue === opt.value
-                      ? "border-amber-500 bg-amber-500"
-                      : "border-slate-500"
+                      ? "border-amber-500/60 bg-amber-500/10 shadow-md"
+                      : "border-[#334155] hover:border-slate-400 hover:bg-[#1a2538]"
                   }`}
                 >
-                  {currentValue === opt.value && (
-                    <div className="w-2 h-2 rounded-full bg-white" />
-                  )}
-                </div>
-                <span className="text-slate-200">{opt.label}</span>
-              </label>
-            ))}
+                  <input
+                    type="radio"
+                    name={question.id}
+                    value={opt.value}
+                    checked={currentValue === opt.value}
+                    onChange={() => handleChange(opt.value)}
+                    className="hidden"
+                  />
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center flex-shrink-0 ${
+                      currentValue === opt.value
+                        ? "border-amber-500 bg-amber-500"
+                        : "border-slate-500"
+                    }`}
+                  >
+                    {currentValue === opt.value && (
+                      <div className="w-2 h-2 rounded-full bg-white" />
+                    )}
+                  </div>
+                  <span className="text-slate-200">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+            {error && (
+              <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
+                <span>⚠️</span> {error}
+              </p>
+            )}
           </div>
         );
 
@@ -78,29 +118,30 @@ export function QuestionCard({ question }: QuestionCardProps) {
           ? (currentValue as string[])
           : [];
         return (
-          <div className="grid gap-2">
-            {question.options?.map((opt) => {
-              const isSelected = selectedValues.includes(opt.value);
-              return (
-                <label
-                  key={opt.value}
-                  className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                    isSelected
-                      ? "border-amber-500/60 bg-amber-500/10 shadow-md"
-                      : "border-[#334155] hover:border-slate-500 hover:bg-[#1a2538]"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() => {
-                      const newValues = isSelected
-                        ? selectedValues.filter((v) => v !== opt.value)
-                        : [...selectedValues, opt.value];
-                      setAnswer(question.id, newValues);
-                    }}
-                    className="hidden"
-                  />
+          <div>
+            <div className="grid gap-2">
+              {question.options?.map((opt) => {
+                const isSelected = selectedValues.includes(opt.value);
+                return (
+                  <label
+                    key={opt.value}
+                    className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      isSelected
+                        ? "border-amber-500/60 bg-amber-500/10 shadow-md"
+                        : "border-[#334155] hover:border-slate-500 hover:bg-[#1a2538]"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => {
+                        const newValues = isSelected
+                          ? selectedValues.filter((v) => v !== opt.value)
+                          : [...selectedValues, opt.value];
+                        handleChange(newValues);
+                      }}
+                      className="hidden"
+                    />
                   <div
                     className={`w-5 h-5 rounded border mr-3 flex items-center justify-center flex-shrink-0 transition-all ${
                       isSelected
@@ -119,7 +160,13 @@ export function QuestionCard({ question }: QuestionCardProps) {
               );
             })}
           </div>
-        );
+          {error && (
+            <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
+              <span>⚠️</span> {error}
+            </p>
+          )}
+        </div>
+      );
 
       case "slider":
         const sliderVal = Number(currentValue) || question.sliderRange?.min || 1;

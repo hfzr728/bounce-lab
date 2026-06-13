@@ -35,6 +35,11 @@ export type DimensionKey =
   | "powerSpeed"
   | "mobility"
   | "endurance"
+  | "glute"
+  | "injury"
+  | "recovery"
+  | "psychology"
+  | "technique"
   | "trainingHx"
   | "lifestyle"
   | "availability";
@@ -47,6 +52,11 @@ export const DIMENSION_LABELS: Record<DimensionKey, string> = {
   powerSpeed: "爆发力与速度",
   mobility: "柔韧与活动度",
   endurance: "能量系统",
+  glute: "臀肌功能",
+  injury: "伤病历史",
+  recovery: "恢复与生活习惯",
+  psychology: "心理素质",
+  technique: "技术评估",
   trainingHx: "训练经验与伤病",
   lifestyle: "恢复与生活方式",
   availability: "训练资源与目标",
